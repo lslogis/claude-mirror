@@ -1,0 +1,686 @@
+/* ========================================
+   Claude Mirror — Styles
+   ======================================== */
+
+:root {
+  --bg: #0a0a0c;
+  --bg-warm: #0e0c0a;
+  --text: #d4cec6;
+  --text-dim: #4a4540;
+  --text-muted: #6b6560;
+  --accent: #c8a882;
+  --accent-dim: #6b5a45;
+  --font: 'Noto Serif KR', 'Batang', Georgia, serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+}
+
+/* === Reset === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+::selection {
+  background: var(--accent-dim);
+  color: var(--text);
+}
+
+/* === Ambient Background === */
+.ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(60, 45, 30, 0.15), transparent 70%);
+  opacity: 0;
+  transition: opacity 2s ease;
+}
+
+body.ready .ambient {
+  opacity: 1;
+}
+
+/* === Scene System === */
+.scene {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 700ms ease, visibility 0s 700ms;
+}
+
+.scene.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 700ms ease, visibility 0s 0s;
+}
+
+/* === INTRO === */
+#intro {
+  z-index: 10;
+  cursor: pointer;
+  user-select: none;
+}
+
+.intro-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.intro-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15em;
+}
+
+.title-word {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  min-height: 1.2em;
+}
+
+#title-claude {
+  color: var(--text);
+}
+
+#title-mirror {
+  color: var(--accent);
+}
+
+/* Letter animation */
+.letter {
+  display: inline-block;
+  opacity: 0;
+  animation: letterIn 700ms var(--ease-out) forwards;
+}
+
+@keyframes letterIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Reflection */
+.title-reflection {
+  transform: scaleY(-1);
+  opacity: 0;
+  transition: opacity 1.5s ease 1.8s;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 80%);
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent 80%);
+  filter: blur(1.5px);
+  margin-top: -0.1em;
+}
+
+#title-mirror-ref {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 300;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+  color: var(--accent);
+}
+
+.title-reflection .letter {
+  animation: letterIn 700ms var(--ease-out) forwards;
+}
+
+body.intro-ready .title-reflection {
+  opacity: 0.12;
+}
+
+/* Intro line */
+.intro-line {
+  width: 0;
+  height: 1px;
+  background: var(--accent-dim);
+  margin: 2rem 0;
+  transition: width 800ms var(--ease-out);
+}
+
+.intro-line.show {
+  width: 80px;
+}
+
+/* Intro text */
+.intro-sub,
+.intro-enter {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 800ms ease, transform 800ms var(--ease-out);
+}
+
+.intro-sub.show,
+.intro-enter.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-sub {
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 300;
+  color: var(--text-muted);
+  letter-spacing: 0.3em;
+}
+
+.intro-enter {
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  margin-top: 3rem;
+  animation: pulse 3s ease-in-out infinite 4s;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.intro-enter.show {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+/* === MENU === */
+#menu {
+  z-index: 5;
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu-inner {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 4rem 2rem 3rem;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.menu-logo {
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--accent-dim);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.menu-tagline {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+}
+
+/* Question items */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.question-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.3s ease, transform 0.3s ease, background 0.3s ease;
+  border-radius: 4px;
+  position: relative;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.question-item.visible {
+  opacity: 0.55;
+  transform: translateY(0);
+}
+
+@media (hover: none) {
+  .question-item.visible {
+    opacity: 0.7;
+  }
+}
+
+.question-item:hover {
+  opacity: 1;
+  background: rgba(200, 168, 130, 0.04);
+}
+
+.question-item:active {
+  background: rgba(200, 168, 130, 0.08);
+}
+
+.question-number {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  min-width: 2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.question-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.question-title {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.question-en {
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+
+.question-format {
+  font-size: 0.65rem;
+  color: var(--accent-dim);
+  letter-spacing: 0.1em;
+  margin-left: auto;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* Read indicator */
+.question-item.read .question-number::after {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0.6;
+}
+
+/* Answer whisper on hover */
+.question-whisper {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  white-space: nowrap;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (hover: hover) {
+  .question-item:hover .question-whisper {
+    opacity: 0.2;
+  }
+}
+
+/* Phase dividers */
+.phase-divider {
+  height: 1px;
+  background: var(--text-dim);
+  opacity: 0.15;
+  margin: 1.5rem 1.5rem;
+}
+
+/* Menu footer */
+.menu-footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(100, 90, 80, 0.1);
+}
+
+.menu-arc {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.menu-credit {
+  font-size: 0.65rem;
+  color: var(--accent-dim);
+  letter-spacing: 0.2em;
+}
+
+/* === READER === */
+#reader {
+  z-index: 15;
+  flex-direction: column;
+  background: var(--bg);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.reader-back {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  z-index: 20;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.reader-back:hover {
+  color: var(--accent);
+}
+
+#reader.active .reader-back {
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+.reader-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 4rem 2rem;
+  overflow: hidden;
+}
+
+.reader-slide {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Slide animations */
+.reader-slide.entering {
+  animation: slideIn 800ms var(--ease-out) forwards;
+}
+
+.reader-slide.exiting {
+  animation: slideOut 400ms var(--ease-in) forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(25px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-15px); }
+}
+
+/* Slide content types */
+.slide-number {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-bottom: 2rem;
+}
+
+.slide-question {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.slide-question-en {
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
+  font-weight: 300;
+  color: var(--text-dim);
+  margin-top: 1rem;
+  letter-spacing: 0.05em;
+}
+
+/* Quote text with character reveal */
+.slide-quote {
+  font-size: clamp(1.1rem, 2.8vw, 1.4rem);
+  font-weight: 300;
+  line-height: 2;
+  color: var(--text);
+}
+
+.slide-quote .text-line {
+  display: block;
+}
+
+.slide-quote .char {
+  opacity: 0;
+  animation: charIn 400ms ease forwards;
+}
+
+@keyframes charIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Answer (last slide) */
+.slide-answer .slide-quote {
+  color: var(--accent);
+  font-weight: 400;
+}
+
+.slide-answer-line {
+  width: 40px;
+  height: 1px;
+  background: var(--accent-dim);
+  margin: 0 auto 2.5rem;
+  opacity: 0;
+  animation: lineExtend 600ms ease 200ms forwards;
+}
+
+@keyframes lineExtend {
+  from { width: 0; opacity: 0; }
+  to { width: 40px; opacity: 1; }
+}
+
+.slide-answer-id {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  margin-top: 2.5rem;
+  opacity: 0;
+  animation: fadeIn 800ms ease 600ms forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Reader bottom */
+.reader-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  pointer-events: none;
+  z-index: 16;
+}
+
+.reader-progress {
+  width: 120px;
+  height: 1px;
+  background: rgba(100, 90, 80, 0.2);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.reader-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent-dim);
+  transition: width 600ms var(--ease-out);
+}
+
+.reader-hint {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#reader.active .reader-hint {
+  opacity: 0.5;
+  transition-delay: 1s;
+}
+
+/* Reader ambient glow */
+#reader::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(200, 168, 130, 0.025), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+#reader.active::before {
+  opacity: 1;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .menu-inner {
+    padding: 2rem 1.2rem;
+  }
+
+  .menu-header {
+    margin-bottom: 3rem;
+  }
+
+  .question-item {
+    padding: 0.8rem 1rem;
+    gap: 1rem;
+  }
+
+  .question-whisper {
+    display: none;
+  }
+
+  .question-format {
+    display: none;
+  }
+
+  .reader-stage {
+    padding: 3rem 1.5rem;
+  }
+
+  .reader-back {
+    top: 1rem;
+    left: 1rem;
+  }
+
+  .slide-quote {
+    line-height: 1.9;
+  }
+}
+
+@media (max-width: 400px) {
+  .title-word {
+    font-size: 2.5rem;
+  }
+
+  #title-mirror-ref {
+    font-size: 2.5rem;
+  }
+
+  .question-item {
+    gap: 0.8rem;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .slide-quote {
+    font-size: 1rem;
+    line-height: 1.85;
+  }
+}
+
+/* === Scrollbar === */
+#menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+#menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#menu::-webkit-scrollbar-thumb {
+  background: var(--text-dim);
+  border-radius: 2px;
+}
+
+/* === Print === */
+@media print {
+  body { background: white; color: black; }
+  .ambient, .reader-bottom, .reader-back { display: none; }
+}
