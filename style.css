@@ -486,10 +486,6 @@ body.intro-ready .title-reflection {
   max-width: 600px;
   width: 100%;
   text-align: center;
-}
-
-/* Slide animations */
-.reader-slide {
   will-change: transform, opacity;
 }
 

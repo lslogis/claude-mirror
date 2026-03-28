@@ -412,7 +412,10 @@ let currentScene = 'intro';
 let currentEssay = null;
 let currentSlide = 0;
 let isAnimating = false;
-let readEssays = JSON.parse(localStorage.getItem('claude-mirror-read') || '[]');
+let readEssays = (() => {
+  try { return JSON.parse(localStorage.getItem('claude-mirror-read') || '[]'); }
+  catch { return []; }
+})();
 let menuRevealed = false;
 
 // === ELEMENTS ===
@@ -533,12 +536,14 @@ function closeReader() {
   const essay = essays[currentEssay];
   if (!readEssays.includes(essay.id)) {
     readEssays.push(essay.id);
-    localStorage.setItem('claude-mirror-read', JSON.stringify(readEssays));
+    try { localStorage.setItem('claude-mirror-read', JSON.stringify(readEssays)); }
+    catch { /* localStorage unavailable */ }
   }
 
-  currentEssay = null;
+  // Show menu first (while currentEssay still set for scroll-to-last-read)
   currentSlide = 0;
   showMenu();
+  currentEssay = null;
 }
 
 function showCurrentSlide() {
