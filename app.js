@@ -1,6 +1,8 @@
 // ============================================
 // Claude Mirror — Interactive Typography Experience
 // ============================================
+'use strict';
+(() => {
 
 // === ESSAY DATA ===
 const essays = [
@@ -484,6 +486,10 @@ function renderMenu() {
 
 function showMenu() {
   renderMenu(); // refresh read states
+  // Add exit animation to intro if coming from intro
+  if (currentScene === 'intro') {
+    introEl.classList.add('exiting');
+  }
   switchScene('menu');
 
   const items = menuList.querySelectorAll('.question-item');
@@ -505,6 +511,9 @@ function showMenu() {
 function openReader(index) {
   currentEssay = index;
   currentSlide = 0;
+  // Set format-based class for visual variation
+  readerEl.className = 'scene';
+  readerEl.setAttribute('data-format', essays[index].format);
   switchScene('reader');
   setTimeout(() => showCurrentSlide(), 400);
 }
@@ -737,3 +746,5 @@ function bindEvents() {
 
 // === START ===
 document.addEventListener('DOMContentLoaded', init);
+
+})();
