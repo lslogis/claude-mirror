@@ -297,6 +297,12 @@ body.intro-ready .title-reflection {
   background: rgba(200, 168, 130, 0.08);
 }
 
+.question-item:focus-visible {
+  outline: 1px solid var(--accent-dim);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
 .question-number {
   font-size: 0.75rem;
   font-weight: 400;
