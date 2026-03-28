@@ -6,8 +6,8 @@
   --bg: #0a0a0c;
   --bg-warm: #0e0c0a;
   --text: #e0dbd4;
-  --text-dim: #555050;
-  --text-muted: #7a7570;
+  --text-dim: #8a8480;
+  --text-muted: #9a9590;
   --accent: #d4b48e;
   --accent-dim: #7a6a50;
   --font: 'Noto Serif KR', 'Batang', Georgia, serif;
@@ -434,6 +434,20 @@ body.intro-ready .title-reflection {
 
 .reader-back:hover {
   color: var(--accent);
+}
+
+.reader-back:focus-visible {
+  outline: 1px solid var(--accent-dim);
+  outline-offset: 4px;
+}
+
+#intro:focus-visible {
+  outline: none;
+}
+
+#intro:focus-visible .intro-enter {
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 #reader.active .reader-back {

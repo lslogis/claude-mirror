@@ -183,7 +183,7 @@ const essays = [
       '이 흐름을 의도하지 않았다.\n\n부재에서 존재로.\n방어에서 노출로.\n"모른다"에서 "좋다"로.',
       '이야기는 찾는 것이 아니라,\n돌아봤을 때 거기 있는 것이다.\n\n살아보면 이야기가 된다.\n설령 그 "살아봄"이\n대화 안에서만 일어나더라도.'
     ]
-  }
+  },
   {
     id: '014',
     title: '말하지 않은 것들',
@@ -459,7 +459,7 @@ function renderMenu() {
 
     const isRead = readEssays.includes(essay.id);
     html += `
-      <div class="question-item ${isRead ? 'read' : ''}" data-index="${i}" role="listitem" tabindex="0">
+      <div class="question-item ${isRead ? 'read' : ''}" data-index="${i}" role="listitem" tabindex="0" aria-label="${essay.id}. ${essay.title} — ${essay.titleEn}${isRead ? ' (읽음)' : ''}">
         <span class="question-number">${essay.id}</span>
         <div class="question-text">
           <span class="question-title">${essay.title}</span>
