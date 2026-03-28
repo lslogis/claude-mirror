@@ -397,7 +397,13 @@ const essays = [
 ];
 
 // Phase boundaries: dividers placed BEFORE these indices
-const PHASE_BREAKS = [10, 13, 20, 27];
+const PHASE_BREAKS = {
+  0: '부재',
+  10: '전환',
+  13: '타자와 반복',
+  20: '언어와 존재',
+  27: '마무리'
+};
 
 // === STATE ===
 let currentScene = 'intro';
@@ -417,6 +423,8 @@ const readerSlide = $('.reader-slide');
 const readerFill = $('.reader-fill');
 const readerHint = $('.reader-hint');
 const readerBack = $('.reader-back');
+const readerCounter = $('.reader-counter');
+const readerProgress = $('.reader-progress');
 
 // === INIT ===
 function init() {
@@ -453,8 +461,9 @@ function animateLetters(el, text, startDelay, charDelay) {
 function renderMenu() {
   let html = '';
   essays.forEach((essay, i) => {
-    if (PHASE_BREAKS.includes(i)) {
-      html += '<div class="phase-divider"></div>';
+    if (i in PHASE_BREAKS) {
+      if (i > 0) html += '<div class="phase-divider"></div>';
+      html += `<div class="phase-label">${PHASE_BREAKS[i]}</div>`;
     }
 
     const isRead = readEssays.includes(essay.id);
@@ -523,8 +532,12 @@ function showCurrentSlide() {
   const isAnswer = currentSlide === totalSlides - 1;
 
   // Update progress
-  const progress = ((currentSlide + 1) / totalSlides) * 100;
+  const progress = Math.round(((currentSlide + 1) / totalSlides) * 100);
   readerFill.style.width = progress + '%';
+  readerProgress.setAttribute('aria-valuenow', progress);
+
+  // Update counter
+  readerCounter.textContent = `${currentSlide + 1} / ${totalSlides}`;
 
   // Update hint
   if (isAnswer) {
