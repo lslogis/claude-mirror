@@ -496,6 +496,16 @@ function showMenu() {
   if (menuRevealed) {
     // Instant reveal on return visits
     items.forEach(item => item.classList.add('visible'));
+
+    // Scroll to last-read essay on return
+    if (currentEssay !== null) {
+      const lastItem = menuList.querySelector(`[data-index="${currentEssay}"]`);
+      if (lastItem) {
+        setTimeout(() => {
+          lastItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 200);
+      }
+    }
   } else {
     // Stagger reveal on first visit
     items.forEach((item, i) => {
