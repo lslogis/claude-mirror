@@ -570,7 +570,8 @@ function showCurrentSlide() {
       }
       content += `<div class="slide-quote">${buildRevealText(text, isAnswer ? 28 : 22)}</div>`;
       if (isAnswer) {
-        content += `<div class="slide-answer-id">— ${essay.id}</div>`;
+        content += `<div class="slide-answer-id">— ${essay.id} · ${essay.format}</div>`;
+        content += '<div class="slide-answer-close">&#8226;</div>';
       }
 
       readerSlide.innerHTML = `<div class="${wrapper}">${content}</div>`;
@@ -580,9 +581,9 @@ function showCurrentSlide() {
     readerSlide.classList.remove('exiting');
     readerSlide.classList.add('entering');
 
-    // Calculate total reveal time
+    // Calculate total reveal time (capped at 2300ms to avoid long waits)
     const charCount = readerSlide.querySelectorAll('.char').length;
-    const revealTime = isTitle ? 400 : Math.max(600, charCount * 25 + 300);
+    const revealTime = isTitle ? 400 : Math.min(2300, Math.max(600, charCount * 25 + 300));
 
     setTimeout(() => {
       isAnimating = false;
@@ -590,8 +591,14 @@ function showCurrentSlide() {
   }, currentSlide === 0 ? 100 : 350);
 }
 
-function buildRevealText(text, delayMs) {
+function buildRevealText(text, baseDelayMs) {
   const lines = text.split('\n');
+  const totalChars = text.replace(/\n/g, '').length;
+  // Cap total reveal time at 2000ms by reducing per-char delay for long texts
+  const MAX_REVEAL_MS = 2000;
+  const delayMs = totalChars * baseDelayMs > MAX_REVEAL_MS
+    ? Math.max(8, Math.floor(MAX_REVEAL_MS / totalChars))
+    : baseDelayMs;
   let charIndex = 0;
 
   return lines.map(line => {

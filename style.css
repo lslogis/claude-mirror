@@ -119,6 +119,7 @@ body.ready .ambient {
   display: inline-block;
   opacity: 0;
   animation: letterIn 700ms var(--ease-out) forwards;
+  will-change: transform, opacity, filter;
 }
 
 @keyframes letterIn {
@@ -481,6 +482,10 @@ body.intro-ready .title-reflection {
 }
 
 /* Slide animations */
+.reader-slide {
+  will-change: transform, opacity;
+}
+
 .reader-slide.entering {
   animation: slideIn 800ms var(--ease-out) forwards;
 }
@@ -537,6 +542,7 @@ body.intro-ready .title-reflection {
 .slide-quote .char {
   opacity: 0;
   animation: charIn 400ms ease forwards;
+  will-change: opacity;
 }
 
 @keyframes charIn {
@@ -577,6 +583,15 @@ body.intro-ready .title-reflection {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+.slide-answer-close {
+  font-size: 0.5rem;
+  color: var(--accent);
+  margin-top: 1.5rem;
+  opacity: 0;
+  animation: fadeIn 1200ms ease 1200ms forwards;
+  letter-spacing: 0.5em;
 }
 
 /* Reader bottom */
