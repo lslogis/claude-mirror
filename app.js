@@ -349,7 +349,7 @@ function showCurrentSlide() {
       if (isAnswer) {
         content += '<div class="slide-answer-line"></div>';
       }
-      content += `<div class="slide-quote">${buildRevealText(text, isAnswer ? 30 : 25)}</div>`;
+      content += `<div class="slide-quote">${buildRevealText(text, isAnswer ? 28 : 22)}</div>`;
       if (isAnswer) {
         content += `<div class="slide-answer-id">— ${essay.id}</div>`;
       }

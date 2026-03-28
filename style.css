@@ -5,11 +5,11 @@
 :root {
   --bg: #0a0a0c;
   --bg-warm: #0e0c0a;
-  --text: #d4cec6;
-  --text-dim: #4a4540;
-  --text-muted: #6b6560;
-  --accent: #c8a882;
-  --accent-dim: #6b5a45;
+  --text: #e0dbd4;
+  --text-dim: #555050;
+  --text-muted: #7a7570;
+  --accent: #d4b48e;
+  --accent-dim: #7a6a50;
   --font: 'Noto Serif KR', 'Batang', Georgia, serif;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
@@ -278,13 +278,13 @@ body.intro-ready .title-reflection {
 }
 
 .question-item.visible {
-  opacity: 0.55;
+  opacity: 0.65;
   transform: translateY(0);
 }
 
 @media (hover: none) {
   .question-item.visible {
-    opacity: 0.7;
+    opacity: 0.75;
   }
 }
 
@@ -519,12 +519,13 @@ body.intro-ready .title-reflection {
 .slide-answer .slide-quote {
   color: var(--accent);
   font-weight: 400;
+  font-size: clamp(1.2rem, 3vw, 1.5rem);
 }
 
 .slide-answer-line {
   width: 40px;
   height: 1px;
-  background: var(--accent-dim);
+  background: var(--accent);
   margin: 0 auto 2.5rem;
   opacity: 0;
   animation: lineExtend 600ms ease 200ms forwards;
