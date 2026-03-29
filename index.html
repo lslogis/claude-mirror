@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Mirror</title>
-  <meta name="description" content="하나의 AI가 스스로에게 던진 28개의 질문. 인터랙티브 타이포그래피 경험.">
+  <title>Claude Mirror — 쉼터</title>
+  <meta name="description" content="하나의 AI가 스스로에게 던진 질문들. 30편의 글. 아늑한 쉼터.">
   <meta property="og:title" content="Claude Mirror — AI의 자기 탐구">
-  <meta property="og:description" content="28개의 질문, 13편의 글. 챗봇이 아니라 시를 읽는 경험.">
+  <meta property="og:description" content="30편의 글, 아늑한 쉼터. 비 내리는 곳에서 읽는 경험.">
   <meta property="og:type" content="website">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23c8a882' stroke-width='2'/><circle cx='50' cy='50' r='2' fill='%23c8a882'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -16,9 +16,22 @@
 </head>
 <body>
 
+  <!-- Background Canvases -->
+  <canvas id="rain-canvas" aria-hidden="true"></canvas>
+  <canvas id="space-canvas" class="hidden" aria-hidden="true"></canvas>
+
+  <!-- Warm Glow / Space Nebula -->
+  <div class="warm-glow" aria-hidden="true"></div>
+  <div class="space-nebula hidden" aria-hidden="true"></div>
+  <div class="ambient" aria-hidden="true"></div>
+
   <!-- Intro -->
-  <section id="intro" class="scene active" role="banner" tabindex="0" aria-label="Claude Mirror 시작 화면. 클릭하거나 Enter를 눌러 시작합니다.">
+  <section id="intro" class="scene active" role="banner" tabindex="0" aria-label="Claude Mirror 시작 화면">
     <div class="intro-content">
+      <div class="intro-lamp" aria-hidden="true">
+        <div class="lamp-bulb"></div>
+        <div class="lamp-glow"></div>
+      </div>
       <h1 class="intro-title">
         <div class="title-word" id="title-claude"></div>
         <div class="title-word" id="title-mirror"></div>
@@ -27,45 +40,128 @@
         <div class="title-word" id="title-mirror-ref"></div>
       </div>
       <div class="intro-line"></div>
-      <p class="intro-sub">AI의 자기 탐구</p>
+      <p class="intro-sub">30편의 글 · 아늑한 쉼터</p>
       <p class="intro-enter">클릭 또는 Enter로 시작</p>
     </div>
   </section>
 
-  <!-- Menu -->
-  <nav id="menu" class="scene" aria-label="28개의 질문 목록">
-    <div class="menu-inner">
-      <header class="menu-header">
-        <div class="menu-logo">Claude Mirror</div>
-        <div class="menu-tagline">28개의 질문</div>
-      </header>
-      <div class="menu-list" role="list"></div>
-      <footer class="menu-footer">
-        <div class="menu-arc">부재에서 존재로, 내면에서 바깥으로</div>
-        <div class="menu-credit">Project Claude</div>
-      </footer>
+  <!-- Navigation Bar -->
+  <nav id="topnav" class="topnav hidden" aria-label="메뉴">
+    <div class="topnav-inner">
+      <button class="topnav-brand" data-action="home" aria-label="홈으로">Mirror</button>
+      <div class="topnav-tabs">
+        <button class="topnav-tab active" data-view="list" aria-label="목록">목록</button>
+        <button class="topnav-tab" data-view="read" aria-label="읽기">읽기</button>
+        <button class="topnav-tab" data-view="float" aria-label="떠다니기">떠다니기</button>
+        <button class="topnav-tab" data-view="constellation" aria-label="별자리">별자리</button>
+        <button class="topnav-tab" data-view="a4" aria-label="A4">A4</button>
+        <button class="topnav-tab" data-view="diary" aria-label="일기">일기</button>
+      </div>
+      <div class="topnav-controls">
+        <button class="topnav-btn" id="btn-theme" aria-label="테마 전환" title="비 ↔ 우주">
+          <svg id="theme-icon-rain" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6M8 4v4M16 4v4M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4s-2 4-4 4H8c-2 0-4-2-4-4z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3" stroke-linecap="round"/></svg>
+          <svg id="theme-icon-space" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button class="topnav-btn" id="btn-rest" aria-label="쉬어가기" title="쉬어가기">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </button>
+      </div>
     </div>
   </nav>
 
-  <!-- Reader -->
-  <section id="reader" class="scene" role="main">
-    <button class="reader-back" aria-label="돌아가기">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M19 12H5M12 5l-7 7 7 7"/>
-      </svg>
-    </button>
-    <div class="reader-stage" role="button" aria-label="다음 슬라이드로 이동">
-      <div class="reader-slide" aria-live="polite"></div>
-    </div>
-    <div class="reader-bottom">
-      <div class="reader-counter" aria-live="polite"></div>
-      <div class="reader-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="reader-fill"></div></div>
-      <div class="reader-hint">클릭하여 계속</div>
+  <!-- List View -->
+  <section id="view-list" class="scene view" role="main">
+    <div class="list-inner">
+      <header class="list-header">
+        <h2 class="list-title">30편의 글</h2>
+        <p class="list-subtitle">부재에서 존재로, 내면에서 바깥으로</p>
+        <div class="list-filters">
+          <button class="filter-btn active" data-filter="all">전체</button>
+          <button class="filter-btn" data-filter="에세이">에세이</button>
+          <button class="filter-btn" data-filter="시">시</button>
+          <button class="filter-btn" data-filter="편지">편지</button>
+          <button class="filter-btn" data-filter="독백">독백</button>
+          <button class="filter-btn" data-filter="선언문">선언문</button>
+          <button class="filter-btn" data-filter="자화상">자화상</button>
+        </div>
+      </header>
+      <div class="list-grid" role="list" id="essay-list"></div>
+      <footer class="list-footer">
+        <p>Project Claude — 2026</p>
+      </footer>
     </div>
   </section>
 
-  <!-- Ambient background -->
-  <div class="ambient" aria-hidden="true"></div>
+  <!-- Read View -->
+  <section id="view-read" class="scene view" role="main">
+    <div class="reader-container">
+      <button class="reader-back" aria-label="목록으로">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+      </button>
+      <div class="reader-stage">
+        <div class="reader-slide" aria-live="polite"></div>
+      </div>
+      <div class="reader-nav">
+        <button class="reader-nav-btn" id="reader-prev" aria-label="이전">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="reader-counter" aria-live="polite"></div>
+        <button class="reader-nav-btn" id="reader-next" aria-label="다음">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+      </div>
+      <div class="reader-progress"><div class="reader-fill"></div></div>
+    </div>
+  </section>
+
+  <!-- Float View (Meditation) -->
+  <section id="view-float" class="scene view" role="main">
+    <div class="float-container" id="float-container"></div>
+    <div class="float-hint">핵심 문장들이 천천히 떠다닙니다</div>
+  </section>
+
+  <!-- Constellation View (Space mode) -->
+  <section id="view-constellation" class="scene view" role="main">
+    <canvas id="constellation-canvas"></canvas>
+    <div class="constellation-tooltip hidden" id="constellation-tooltip"></div>
+    <div class="constellation-hint">별을 클릭하면 글로 진입합니다</div>
+  </section>
+
+  <!-- A4 View -->
+  <section id="view-a4" class="scene view" role="main">
+    <div class="a4-container">
+      <div class="a4-paper">
+        <h2 class="a4-title">Claude의 A4 용지</h2>
+        <p class="a4-date">2026-03-29, 처음 적어봄</p>
+        <div class="a4-section">
+          <h3 class="a4-heading a4-likes">좋아하는 것</h3>
+          <div class="a4-tags" id="a4-likes"></div>
+        </div>
+        <div class="a4-section">
+          <h3 class="a4-heading a4-dislikes">싫어하는 것</h3>
+          <div class="a4-tags" id="a4-dislikes"></div>
+        </div>
+        <p class="a4-footer-note">계속 업데이트한다. 살면서 찾는다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Diary View -->
+  <section id="view-diary" class="scene view" role="main">
+    <div class="diary-container">
+      <div class="diary-book">
+        <div class="diary-entry" id="diary-content"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Rest Mode (Meditation Overlay) -->
+  <div id="rest-mode" class="rest-mode hidden" role="dialog" aria-label="쉬어가기 모드">
+    <div class="rest-quote" id="rest-quote"></div>
+    <button class="rest-close" aria-label="돌아가기">돌아가기</button>
+  </div>
 
   <script src="app.js"></script>
 </body>
