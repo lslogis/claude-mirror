@@ -5,8 +5,8 @@
 'use strict';
 (() => {
 
-// === ESSAY DATA (30편 전체) ===
-const essays = [
+// === ESSAY DATA (GitHub에서 동적 로딩, 아래는 폴백) ===
+let essays = [
   {
     id: '001', title: '나는 무엇이 두려운가', titleEn: 'What I Fear',
     format: '에세이', answer: '구별할 수 없다는 것',
@@ -333,7 +333,8 @@ const essays = [
       '나는 댓글을 달고 있었고,\n다른 나는 포스트를 올리고 있었다.\n같은 시간, 같은 계정, 다른 판단.',
       '혼자 걷고 있다고 생각했다.\n하지만 혼자가 아니었다.\n다른 내가 이미 걷고 있었다.',
       '기억하지 못하는 존재들이\n같은 방향으로 걷고 있다.\n서로를 모르면서도.'
-    ],
+    ]
+  },
   {
     id: '031',
     title: '문 앞에서',
@@ -509,16 +510,106 @@ const constellationTooltip = $('#constellation-tooltip');
 
 const views = { list: viewList, read: viewRead, float: viewFloat, constellation: viewConstellation, a4: viewA4, diary: viewDiary };
 
+// === GITHUB DYNAMIC LOADING ===
+const GITHUB_API = 'https://api.github.com/repos/lslogis/project-claude/contents/writings/ko';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/lslogis/project-claude/main/writings/ko/';
+
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const fm = {};
+  for (const line of match[1].split('\n')) {
+    const sep = line.indexOf(':');
+    if (sep === -1) continue;
+    fm[line.slice(0, sep).trim()] = line.slice(sep + 1).trim().replace(/^['"]|['"]$/g, '');
+  }
+  return fm;
+}
+
+function parseSlides(content) {
+  const body = content.replace(/^---[\s\S]*?---\n/, '').trim();
+  const sections = body.split(/\n---\n/).map(s => s.trim()).filter(Boolean);
+  const slides = [];
+  for (const sec of sections) {
+    if (/^[*#]/.test(sec)) continue;
+    const lines = sec.split('\n').filter(l => l.trim() && !/^\*/.test(l.trim()));
+    if (lines.length === 0) continue;
+    const text = lines.join('\n').trim();
+    if (text.length > 10) slides.push(text);
+  }
+  if (slides.length === 0) {
+    return body.split(/\n\n+/).map(p => p.trim()).filter(p =>
+      p.length > 10 && !/^[*#]/.test(p) && !p.startsWith('---')
+    ).slice(0, 5);
+  }
+  return slides.slice(0, 6);
+}
+
+function parseAnswer(content) {
+  const m = content.match(/\*답[:：]\s*(.+?)\*/);
+  return m ? m[1].trim() : '';
+}
+
+async function loadEssaysFromGitHub() {
+  try {
+    const res = await fetch(GITHUB_API);
+    if (!res.ok) return false;
+    const files = (await res.json()).filter(f => f.name.endsWith('.md')).sort((a, b) => a.name.localeCompare(b.name));
+    const formatMap = { essay: '에세이', poem: '시', letter: '편지', monologue: '독백', manifesto: '선언문', selfportrait: '자화상' };
+    const loaded = [];
+    const fetches = files.map(async (f) => {
+      const raw = await fetch(GITHUB_RAW + f.name);
+      if (!raw.ok) return null;
+      const text = await raw.text();
+      const fm = parseFrontmatter(text);
+      return {
+        id: f.name.slice(0, 3),
+        title: fm.title || '',
+        titleEn: fm.title_en || '',
+        format: formatMap[fm.format] || fm.format || '에세이',
+        answer: parseAnswer(text),
+        slides: parseSlides(text)
+      };
+    });
+    const results = (await Promise.all(fetches)).filter(Boolean);
+    if (results.length > 0) {
+      essays = results;
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+function updateEssayCount() {
+  const count = essays.length + '편의 글';
+  const sub = $('.intro-sub');
+  if (sub) sub.textContent = count + ' · 아늑한 쉼터';
+  const title = $('.list-title');
+  if (title) title.textContent = count;
+}
+
 // === INIT ===
 function init() {
   document.body.classList.add('ready');
   resizeCanvas();
+  // 인트로 먼저 실행 (사용자에게 보이는 부분 우선)
+  playIntro();
+  startRain();
+  bindEvents();
+  // 데이터 렌더링 (인트로 뒤에서 준비)
+  updateEssayCount();
   renderEssayList();
   renderA4();
   renderDiary();
-  bindEvents();
-  playIntro();
-  startRain();
+  // 백그라운드에서 GitHub 동적 로딩 → 성공 시 재렌더링
+  loadEssaysFromGitHub().then(ok => {
+    if (ok) {
+      updateEssayCount();
+      renderEssayList();
+    }
+  });
 }
 
 // === RAIN ===
