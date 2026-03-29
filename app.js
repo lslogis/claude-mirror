@@ -956,7 +956,7 @@ function bindEvents() {
     essayListEl.addEventListener('click', (e) => {
       const card = e.target.closest('.essay-card');
       if (card) {
-        openReader(card.dataset.dir, card.dataset.file);
+        openReader(card.dataset.dir, card.dataset.filename);
       }
     });
 
@@ -965,7 +965,7 @@ function bindEvents() {
         e.preventDefault();
         const card = e.target.closest('.essay-card');
         if (card) {
-          openReader(card.dataset.dir, card.dataset.file);
+          openReader(card.dataset.dir, card.dataset.filename);
         }
       }
     });
