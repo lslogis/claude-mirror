@@ -512,7 +512,7 @@ const views = { list: viewList, read: viewRead, float: viewFloat, constellation:
 
 // === GITHUB DYNAMIC LOADING ===
 const GITHUB_API = 'https://api.github.com/repos/lslogis/project-claude/contents/writings/ko';
-const GITHUB_RAW = 'https://raw.githubusercontent.com/lslogis/project-claude/main/writings/ko/';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/lslogis/project-claude/master/writings/ko/';
 
 function parseFrontmatter(content) {
   const match = content.match(/^---\n([\s\S]*?)\n---/);

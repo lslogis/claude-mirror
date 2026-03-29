@@ -4,19 +4,19 @@
    ======================================== */
 
 :root {
-  --bg: #0a0a0c;
-  --bg-warm: #0e0c0a;
-  --bg-card: #13110f;
-  --bg-card-hover: #1a1714;
-  --bg-surface: #151311;
-  --text: #e0dbd4;
-  --text-dim: #8a8480;
-  --text-muted: #9a9590;
-  --accent: #d4b48e;
-  --accent-dim: #8a7a60;
-  --accent-warm: #c8a070;
-  --warm-glow: rgba(200, 160, 100, 0.04);
-  --warm-glow-strong: rgba(200, 160, 100, 0.08);
+  --bg: #1a1816;
+  --bg-warm: #1e1c18;
+  --bg-card: #252320;
+  --bg-card-hover: #302c28;
+  --bg-surface: #282422;
+  --text: #ece8e2;
+  --text-dim: #a09a94;
+  --text-muted: #b0aaa4;
+  --accent: #dcc4a0;
+  --accent-dim: #9a8a6a;
+  --accent-warm: #d4b080;
+  --warm-glow: rgba(200, 160, 100, 0.07);
+  --warm-glow-strong: rgba(200, 160, 100, 0.14);
   --like-color: #b8d4a0;
   --dislike-color: #d4a0a0;
   --font: 'Noto Serif KR', 'Batang', Georgia, serif;
@@ -1181,14 +1181,14 @@ body.intro-ready .title-reflection { opacity: 0.12; }
 
 /* Space theme body overrides */
 body.theme-space {
-  --bg: #05050a;
-  --bg-warm: #08081a;
+  --bg: #10101a;
+  --bg-warm: #141428;
   --accent: #8ab4f8;
-  --accent-dim: #4a6a9a;
+  --accent-dim: #5a7aaa;
   --accent-warm: #7a9ed8;
-  --warm-glow: rgba(80, 100, 200, 0.04);
-  --warm-glow-strong: rgba(80, 100, 200, 0.08);
-  background: #05050a;
+  --warm-glow: rgba(80, 100, 200, 0.07);
+  --warm-glow-strong: rgba(80, 100, 200, 0.14);
+  background: #10101a;
 }
 
 body.theme-space .warm-glow { opacity: 0; }
