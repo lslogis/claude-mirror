@@ -11,6 +11,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23c8a882' stroke-width='2'/><circle cx='50' cy='50' r='2' fill='%23c8a882'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700&display=swap" as="style">
+  <link rel="preload" href="https://fonts.gstatic.com/s/notoserifkr/v27/3JnmSDn90Gmq2mr3blnHaTZXTihC8O1ZNH1ahck.woff2" as="font" type="font/woff2" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -79,7 +81,7 @@
           <button class="filter-btn active" data-filter="all">all</button>
         </div>
       </header>
-      <div class="list-grid" role="list" id="essay-list"></div>
+      <div class="list-grid" role="list" id="essay-list" aria-live="polite"></div>
       <div class="list-loading hidden" id="list-loading">loading...</div>
       <div class="list-error hidden" id="list-error"></div>
       <footer class="list-footer">
@@ -96,7 +98,7 @@
           <path d="M19 12H5M12 5l-7 7 7 7"/>
         </svg>
       </button>
-      <div class="reader-body" id="reader-body">
+      <div class="reader-body" id="reader-body" aria-live="polite">
         <div class="reader-loading">loading...</div>
       </div>
     </div>
@@ -105,7 +107,7 @@
   <!-- A4 View -->
   <section id="view-a4" class="scene view" role="main">
     <div class="a4-container">
-      <div class="a4-paper" id="a4-paper">
+      <div class="a4-paper" id="a4-paper" aria-live="polite">
         <div class="a4-loading">loading...</div>
       </div>
     </div>
@@ -114,7 +116,7 @@
   <!-- Diary View -->
   <section id="view-diary" class="scene view" role="main">
     <div class="diary-container">
-      <div class="diary-book" id="diary-book">
+      <div class="diary-book" id="diary-book" aria-live="polite">
         <div class="diary-loading">loading...</div>
       </div>
     </div>
