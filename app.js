@@ -34,6 +34,8 @@ let currentTheme = 'rain';
 let drops = [];
 let stars = [];
 let introDataReady = false;
+let rainRAF = null;
+let spaceRAF = null;
 
 // === DOM ===
 const $ = (sel) => document.querySelector(sel);
@@ -41,10 +43,33 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 // === INIT ===
 function init() {
+  // Restore saved theme before first paint
+  const savedTheme = localStorage.getItem('mirror-theme');
+  if (savedTheme === 'space') {
+    currentTheme = 'space';
+    rainEnabled = false;
+    spaceEnabled = true;
+    document.body.classList.add('theme-space');
+  }
+
   document.body.classList.add('ready');
   resizeCanvas();
   playIntro();
-  startRain();
+
+  if (currentTheme === 'space') {
+    if (spaceCanvas) {
+      spaceCanvas.classList.remove('hidden');
+      const nebula = $('.space-nebula');
+      if (nebula) nebula.classList.remove('hidden');
+      $('#theme-icon-rain').classList.add('hidden');
+      $('#theme-icon-space').classList.remove('hidden');
+      initStars();
+      spaceLoop();
+    }
+  } else {
+    startRain();
+  }
+
   bindEvents();
   // Load data in background
   loadAllData();
@@ -203,7 +228,16 @@ async function loadA4() {
 
 async function loadDiary() {
   try {
-    const text = await fetchText(`${GITHUB_RAW_BASE}/diary/2026-03-29.md`);
+    const files = await fetchJSON(`${GITHUB_API_BASE}/diary`);
+    const mdFiles = files
+      .filter(f => f.name.endsWith('.md'))
+      .sort((a, b) => b.name.localeCompare(a.name));
+    if (mdFiles.length === 0) {
+      $('#diary-book').innerHTML = '<p style="color:var(--text-dim);text-align:center;padding:2rem">No diary entries found.</p>';
+      return;
+    }
+    const latest = mdFiles[0];
+    const text = await fetchText(`${GITHUB_RAW_BASE}/diary/${latest.name}`);
     renderDiary(text);
   } catch (e) {
     console.warn('Could not load diary:', e);
@@ -382,6 +416,22 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;');
 }
 
+// === ACCESSIBILITY ===
+
+function announceToScreenReader(message) {
+  let liveRegion = $('#sr-announcer');
+  if (!liveRegion) {
+    liveRegion = document.createElement('div');
+    liveRegion.id = 'sr-announcer';
+    liveRegion.setAttribute('aria-live', 'polite');
+    liveRegion.setAttribute('aria-atomic', 'true');
+    liveRegion.className = 'sr-only';
+    document.body.appendChild(liveRegion);
+  }
+  liveRegion.textContent = '';
+  requestAnimationFrame(() => { liveRegion.textContent = message; });
+}
+
 // === UI UPDATES ===
 
 function updateCounts() {
@@ -432,6 +482,11 @@ function buildFilters() {
       currentFilter = btn.dataset.filter;
       updateListTitle();
       renderList();
+      const writings = currentSource === 'main' ? mainWritings : twinWritings;
+      const count = currentFilter === 'all'
+        ? writings.length
+        : writings.filter(w => w.format === currentFilter).length;
+      announceToScreenReader(`${currentFilter === 'all' ? '전체' : currentFilter} 필터: ${count}개의 글`);
     });
   });
 }
@@ -444,6 +499,12 @@ function renderList() {
 
   const listEl = $('#essay-list');
   let html = '';
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="essay-list-empty" role="status">아직 글이 없습니다</div>';
+    announceToScreenReader(currentFilter === 'all' ? '글이 없습니다' : `${currentFilter} 필터: 글이 없습니다`);
+    return;
+  }
 
   filtered.forEach((w, i) => {
     html += `
@@ -654,12 +715,14 @@ function createDrop() {
 
 function startRain() {
   if (!rainCanvas || !rainCtx) return;
-  for (let i = 0; i < 80; i++) {
+  const isMobile = window.innerWidth < 768;
+  const dropCount = isMobile ? 40 : 80;
+  for (let i = 0; i < dropCount; i++) {
     const d = createDrop();
     d.y = Math.random() * rainCanvas.height;
     drops.push(d);
   }
-  rainLoop();
+  rainRAF = requestAnimationFrame(rainLoop);
 }
 
 function rainLoop() {
@@ -667,7 +730,8 @@ function rainLoop() {
   if (!rainEnabled) {
     rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
     rainCanvas.classList.add('hidden');
-    requestAnimationFrame(rainLoop);
+    if (rainRAF) { cancelAnimationFrame(rainRAF); }
+    rainRAF = null;
     return;
   }
   rainCanvas.classList.remove('hidden');
@@ -687,7 +751,7 @@ function rainLoop() {
       drops[i] = createDrop();
     }
   }
-  requestAnimationFrame(rainLoop);
+  rainRAF = requestAnimationFrame(rainLoop);
 }
 
 // === SPACE STARS ===
@@ -695,7 +759,9 @@ function rainLoop() {
 function initStars() {
   if (!spaceCanvas) return;
   stars = [];
-  for (let i = 0; i < 200; i++) {
+  const isMobile = window.innerWidth < 768;
+  const starCount = isMobile ? 100 : 200;
+  for (let i = 0; i < starCount; i++) {
     stars.push({
       x: Math.random() * spaceCanvas.width,
       y: Math.random() * spaceCanvas.height,
@@ -708,7 +774,11 @@ function initStars() {
 }
 
 function spaceLoop() {
-  if (!spaceCtx || !spaceEnabled) return;
+  if (!spaceCtx || !spaceEnabled) {
+    if (spaceRAF) { cancelAnimationFrame(spaceRAF); }
+    spaceRAF = null;
+    return;
+  }
   spaceCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
   for (const s of stars) {
     s.phase += s.twinkleSpeed;
@@ -718,7 +788,7 @@ function spaceLoop() {
     spaceCtx.fillStyle = `rgba(200, 210, 255, ${o})`;
     spaceCtx.fill();
   }
-  requestAnimationFrame(spaceLoop);
+  spaceRAF = requestAnimationFrame(spaceLoop);
 }
 
 // === THEME TOGGLE ===
@@ -728,6 +798,11 @@ function toggleTheme() {
     currentTheme = 'space';
     rainEnabled = false;
     spaceEnabled = true;
+    if (rainRAF) { cancelAnimationFrame(rainRAF); rainRAF = null; }
+    if (rainCtx) {
+      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+      rainCanvas.classList.add('hidden');
+    }
     document.body.classList.add('theme-space');
     spaceCanvas.classList.remove('hidden');
     const nebula = $('.space-nebula');
@@ -737,18 +812,22 @@ function toggleTheme() {
     spaceCanvas.width = window.innerWidth;
     spaceCanvas.height = window.innerHeight;
     initStars();
-    spaceLoop();
+    if (!spaceRAF) spaceLoop();
   } else {
     currentTheme = 'rain';
     rainEnabled = true;
     spaceEnabled = false;
+    if (spaceRAF) { cancelAnimationFrame(spaceRAF); spaceRAF = null; }
+    if (spaceCtx) spaceCtx.clearRect(0, 0, spaceCanvas.width, spaceCanvas.height);
     document.body.classList.remove('theme-space');
     spaceCanvas.classList.add('hidden');
     const nebula = $('.space-nebula');
     if (nebula) nebula.classList.add('hidden');
     $('#theme-icon-rain').classList.remove('hidden');
     $('#theme-icon-space').classList.add('hidden');
+    if (!rainRAF) rainLoop();
   }
+  localStorage.setItem('mirror-theme', currentTheme);
 }
 
 // === INTRO ===
@@ -903,21 +982,80 @@ function bindEvents() {
 
   // Keyboard navigation
   document.addEventListener('keydown', (e) => {
+    // Ignore shortcuts when typing in input/textarea
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || document.activeElement?.isContentEditable) return;
+
     if (currentView === 'intro') {
       if (['Space', 'Enter'].includes(e.code)) {
         e.preventDefault();
         switchView('list');
       }
-    } else if (currentView === 'read') {
+      return;
+    }
+
+    // View switching: 1=list, 2=read, 3=a4, 4=diary (not from intro)
+    if (e.key === '1') { switchView('list'); return; }
+    if (e.key === '2') {
+      if (!currentReadingFile) {
+        const writings = currentSource === 'main' ? mainWritings : twinWritings;
+        if (writings.length > 0) openReader(writings[0].dirPath, writings[0].filename);
+      } else {
+        switchView('read');
+      }
+      return;
+    }
+    if (e.key === '3') { switchView('a4'); return; }
+    if (e.key === '4') { switchView('diary'); return; }
+
+    // Theme toggle
+    if (e.key === 't') { toggleTheme(); return; }
+
+    // List view: j/k to move focus between essay cards
+    if (currentView === 'list') {
+      if (e.key === 'j' || e.key === 'k') {
+        const cards = Array.from($$('#essay-list .essay-card'));
+        if (cards.length === 0) return;
+        const focused = document.activeElement;
+        const currentIdx = cards.indexOf(focused);
+        let nextIdx;
+        if (e.key === 'j') {
+          nextIdx = currentIdx < cards.length - 1 ? currentIdx + 1 : 0;
+        } else {
+          nextIdx = currentIdx > 0 ? currentIdx - 1 : cards.length - 1;
+        }
+        cards[nextIdx].focus();
+        return;
+      }
+    }
+
+    // Read view shortcuts
+    if (currentView === 'read') {
       if (e.code === 'Escape') {
         e.preventDefault();
         closeReader();
+        return;
+      }
+      // j/k: next/prev essay
+      const writings = currentSource === 'main' ? mainWritings : twinWritings;
+      const idx = writings.findIndex(w => w.filename === currentReadingFile);
+      if (e.key === 'j' && idx < writings.length - 1) {
+        openReader(writings[idx + 1].dirPath, writings[idx + 1].filename);
+        return;
+      }
+      if (e.key === 'k' && idx > 0) {
+        openReader(writings[idx - 1].dirPath, writings[idx - 1].filename);
+        return;
       }
     }
   });
 
-  // Resize
-  window.addEventListener('resize', resizeCanvas);
+  // Resize (debounced)
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resizeCanvas, 150);
+  });
 }
 
 // === START ===
