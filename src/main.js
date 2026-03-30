@@ -207,35 +207,29 @@ async function openReader(dir, file) {
     const iteration = fm.iteration || '';
 
     let html = `<div class="reveal" style="animation-delay:100ms">`;
-    html += `<div class="text-center mb-12 pb-10 border-b border-dawn-400/[0.06]">`;
+    html += `<div class="text-center mb-6 pb-5 border-b border-dawn-400/[0.06]">`;
 
-    // 프로젝트 라벨
-    html += `<div class="text-[10px] tracking-[0.3em] mb-8 opacity-40" style="color: #a09890;">Project Claude${iteration ? ` — Iteration ${esc(String(iteration))}` : ''}</div>`;
-
-    // 질문 (title)
-    html += `<div class="mb-6">`;
-    html += `<div class="text-[9px] tracking-[0.25em] uppercase mb-3 opacity-50" style="color: #c8a878;">질문</div>`;
-    html += `<h1 class="text-2xl md:text-3xl font-serif font-light leading-relaxed break-keep-all" style="color: #e8e0d4;">${esc(fm.title || id)}</h1>`;
-    if (fm.title_en) html += `<div class="text-xs mt-2 font-light opacity-40" style="color: #b0a8a0;">${esc(fm.title_en)}</div>`;
+    // 프로젝트 라벨 + 포맷 태그 (한 줄로)
+    html += `<div class="text-[10px] tracking-[0.3em] mb-4 opacity-40 flex items-center justify-center gap-3" style="color: #a09890;">`;
+    html += `<span>Project Claude${iteration ? ` — Iteration ${esc(String(iteration))}` : ''}</span>`;
+    if (format) html += `<span class="text-dawn-300/60 border border-dawn-400/20 rounded-full px-2 py-0.5">${esc(format)}</span>`;
     html += `</div>`;
 
-    // 답 (description)
-    if (fm.description) {
-      html += `<div class="mt-6 pt-6" style="border-top: 1px solid rgba(200,168,120,0.06);">`;
-      html += `<div class="text-[9px] tracking-[0.25em] uppercase mb-3 opacity-50" style="color: #a8b0d0;">답</div>`;
-      html += `<p class="text-sm md:text-base font-light leading-relaxed italic break-keep-all" style="color: #b0a8a0;">${esc(fm.description)}</p>`;
-      if (fm.description_en) html += `<p class="text-xs mt-1.5 font-light italic opacity-35" style="color: #9a9490;">${esc(fm.description_en)}</p>`;
-      html += `</div>`;
-    }
+    // 제목
+    html += `<h1 class="text-xl md:text-2xl font-serif font-light leading-snug break-keep-all mb-2" style="color: #e8e0d4;">${esc(fm.title || id)}</h1>`;
+    if (fm.title_en) html += `<div class="text-xs font-light opacity-40 mb-3" style="color: #b0a8a0;">${esc(fm.title_en)}</div>`;
 
-    // 포맷 태그
-    if (format) html += `<div class="inline-block text-[10px] text-dawn-300/60 border border-dawn-400/20 rounded-full px-3 py-1 mt-6">${esc(format)}</div>`;
+    // 답 (description) — 간결하게
+    if (fm.description) {
+      html += `<p class="text-xs font-light leading-relaxed italic break-keep-all opacity-50" style="color: #b0a8a0;">${esc(fm.description)}</p>`;
+      if (fm.description_en) html += `<p class="text-[10px] mt-1 font-light italic opacity-30" style="color: #9a9490;">${esc(fm.description_en)}</p>`;
+    }
     html += '</div></div>';
 
     html += `<div class="reveal text-[15px] md:text-base font-light leading-[2] text-slate-300" style="animation-delay:250ms" id="reader-body">${rendered}</div>`;
 
-    // Nav
-    html += '<div class="flex justify-between mt-12 pt-6 border-t border-dawn-400/[0.06] reveal" style="animation-delay:400ms">';
+    // Nav — 본문과 충분한 간격
+    html += '<div class="flex justify-between mt-24 mb-16 pt-6 border-t border-dawn-400/[0.06] reveal" style="animation-delay:400ms">';
     if (idx > 0) {
       const p = w[idx - 1];
       html += `<button class="nav-btn text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-dir="${p.dirPath}" data-file="${p.filename}"><iconify-icon icon="solar:arrow-left-linear" width="12" class="mr-1 align-middle"></iconify-icon> ${esc(p.title)}</button>`;
