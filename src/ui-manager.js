@@ -215,7 +215,7 @@ export function playIntro() {
   setTimeout(() => {
     const d = $('#intro-desc');
     d.style.opacity = '0.6';
-    d.textContent = 'AI가 스스로에게 던진 32개의 질문';
+    d.textContent = 'AI가 스스로에게 던진 질문들';
   }, 3000);
   setTimeout(() => {
     const e = $('#intro-enter');
@@ -394,10 +394,9 @@ function _updateControls(sceneIdx, totalScenes) {
 
 /**
  * 의미 단위 장면 그룹핑
- * - `---` (SVG 디바이더) = 장면 구분선 (장면에 포함하지 않음)
- * - `<h1>`, `<h2>`, `<h3>` = 새 장면 시작
- * - 짧은 문단(30자 미만)은 다음 문단과 같은 장면
- * - 한 장면 최대 3블록
+ * - `---` (SVG 디바이더)만 장면 구분선으로 사용
+ * - 헤딩, 문단 수 제한 없음 — 작가가 `---`로 의도한 섹션이 그대로 한 장면
+ * - 디바이더 자체는 장면에 포함하지 않음
  */
 function groupScenes(blocks) {
   const scenes = [];
@@ -410,48 +409,17 @@ function groupScenes(blocks) {
   for (const b of blocks) {
     const tag = b.tagName.toLowerCase();
     const isDivider = tag === 'div' && b.querySelector('svg');
-    const isHeading = tag === 'h1' || tag === 'h2' || tag === 'h3';
 
-    // --- 디바이더: 장면 구분선 (화면에 표시하지 않음)
     if (isDivider) {
       pushScene();
       continue;
     }
 
-    // 헤딩: 새 장면 시작
-    if (isHeading) {
-      pushScene();
-      current.push(b);
-      continue;
-    }
-
-    // 현재 장면이 3블록 이상이면 새 장면
-    if (current.length >= 3) {
-      pushScene();
-    }
-
     current.push(b);
-
-    // 짧은 문단은 다음과 묶이도록 장면을 끊지 않음
-    // 긴 문단(80자+)이면 여기서 장면을 끊을 수 있음 (다음이 헤딩이 아닌 한)
   }
   pushScene();
 
-  // 후처리: 1블록짜리 장면 중 짧은 것(30자 미만)은 다음 장면에 병합
-  const merged = [];
-  for (let i = 0; i < scenes.length; i++) {
-    const scene = scenes[i];
-    if (scene.length === 1 && scene[0].textContent.length < 30 && i + 1 < scenes.length) {
-      // 다음 장면에 앞으로 병합 (최대 4블록까지 허용)
-      if (scenes[i + 1].length < 3) {
-        scenes[i + 1].unshift(scene[0]);
-        continue;
-      }
-    }
-    merged.push(scene);
-  }
-
-  return merged;
+  return scenes;
 }
 
 /**
@@ -533,8 +501,8 @@ export async function animateText(container, callbacks) {
     // [머무름] 글자 수에 비례한 읽기 시간
     if (!isLast) {
       const textLen = scene.reduce((sum, b) => sum + b.textContent.length, 0);
-      // 짧은 장면(질문 등): 3초, 긴 장면: 글자당 65ms, 최대 8초
-      const displayTime = Math.min(Math.max(textLen * 65, 3000), 8000);
+      // 짧은 장면: 3초, 긴 장면: 글자당 50ms, 최대 15초
+      const displayTime = Math.min(Math.max(textLen * 50, 3000), 15000);
       await _sleep(displayTime);
     }
     // 마지막 장면은 화면에 영구히 남음 (은은한 광채)

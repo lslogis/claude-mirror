@@ -138,7 +138,10 @@ async function loadAllData() {
     }
     $('#filters').style.display = '';
     const d = $('#intro-desc');
-    if (d) d.textContent = `AI가 스스로에게 던진 ${mainW.length}개의 질문`;
+    if (d) {
+      const total = mainW.length + twinW.length;
+      d.textContent = `AI가 스스로에게 던진 ${total}개의 질문`;
+    }
   } catch (e) {
     $('#book-loading').textContent = '데이터를 불러오지 못했습니다';
     console.error(e);
