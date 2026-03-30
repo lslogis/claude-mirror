@@ -309,11 +309,11 @@ export function renderBookSpines(list, activeFile, onSelect, onHover) {
         style="background: rgba(10,8,20,0.45); border: 1px solid rgba(200,168,120,0.08); animation: fadeInUp 400ms ease ${i * 50}ms both; opacity: 0;"
         role="listitem" tabindex="0">
         <div class="flex items-start gap-3">
-          <span class="text-[10px] tracking-[0.2em] opacity-30 pt-0.5 shrink-0" style="color: #a09890;">${b.id.slice(0, 3)}</span>
+          <span class="text-[10px] tracking-[0.2em] opacity-60 pt-0.5 shrink-0" style="color: #c8c0b8;">${b.id.slice(0, 3)}</span>
           <div class="flex-1 min-w-0">
             <div class="text-sm font-light leading-snug break-keep-all group-hover:text-dawn-200 transition-colors" style="color: #e8e0d4;">${esc(b.title)}</div>
-            ${b.titleEn ? `<div class="text-[11px] mt-0.5 opacity-35" style="color: #b0a8a0;">${esc(b.titleEn)}</div>` : ''}
-            ${b.description ? `<div class="text-[10px] mt-1.5 opacity-40 leading-relaxed line-clamp-2" style="color: #a09890;">${esc(b.description)}</div>` : ''}
+            ${b.titleEn ? `<div class="text-[11px] mt-0.5 opacity-60" style="color: #d0c8c0;">${esc(b.titleEn)}</div>` : ''}
+            ${b.description ? `<div class="text-[10px] mt-1.5 opacity-60 leading-relaxed line-clamp-2" style="color: #c0b8b0;">${esc(b.description)}</div>` : ''}
             <span class="inline-block text-[9px] mt-2 opacity-60 rounded-full px-2 py-0.5" style="color: ${spineColor}; border: 1.5px solid ${spineColor}50;">${esc(b.format)}</span>
           </div>
         </div>
