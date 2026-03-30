@@ -247,6 +247,9 @@
 
           <!-- 재생 컨트롤 (절대 센터 고정) -->
           <div id="cinema-controls" class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">
+            <button id="cinema-prev-scene" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;">
+              <iconify-icon icon="solar:alt-arrow-left-linear" width="16"></iconify-icon>
+            </button>
             <button id="cinema-toggle" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;">
               <iconify-icon id="cinema-icon" icon="solar:pause-linear" width="14"></iconify-icon>
             </button>
@@ -254,6 +257,9 @@
             <div class="w-16 h-[3px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);">
               <div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div>
             </div>
+            <button id="cinema-next-scene" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;">
+              <iconify-icon icon="solar:alt-arrow-right-linear" width="16"></iconify-icon>
+            </button>
             <button id="cinema-stop" class="text-[10px] tracking-wider transition-colors duration-300 px-1.5 py-0.5 rounded hover:text-dawn-200" style="color: #9a9490;">
               전문보기
             </button>

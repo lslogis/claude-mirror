@@ -343,11 +343,15 @@ export function renderBookSpines(list, activeFile, onSelect, onHover) {
 let _animSeq = 0;
 let _paused = false;
 let _pauseResolve = null;
+let _manualJump = -1;  // 수동 장면 이동 요청 (-1 = 없음)
+let _currentSceneIdx = 0;
+let _totalScenes = 0;
 
 /** 진행 중인 시네마틱 애니메이션 취소 */
 export function cancelAnimation() {
   _animSeq++;
   _paused = false;
+  _manualJump = -1;
   if (_pauseResolve) { _pauseResolve(); _pauseResolve = null; }
   const ctrl = $('#cinema-controls');
   if (ctrl) ctrl.classList.add('hidden');
@@ -359,6 +363,20 @@ export function togglePause() {
   const icon = $('#cinema-icon');
   if (icon) icon.setAttribute('icon', _paused ? 'solar:play-linear' : 'solar:pause-linear');
   if (!_paused && _pauseResolve) { _pauseResolve(); _pauseResolve = null; }
+}
+
+/** 수동 장면 이동 — 오토플레이 중단하고 해당 장면으로 점프 */
+export function jumpScene(delta) {
+  const target = _currentSceneIdx + delta;
+  if (target < 0 || target >= _totalScenes) return;
+  _manualJump = target;
+  // 오토플레이 중이면 멈추고 수동 모드로
+  if (!_paused) {
+    _paused = true;
+    const icon = $('#cinema-icon');
+    if (icon) icon.setAttribute('icon', 'solar:play-linear');
+  }
+  if (_pauseResolve) { _pauseResolve(); _pauseResolve = null; }
 }
 
 /** 시네마틱 모드 종료 → 전문 보기 */
@@ -378,7 +396,8 @@ function _sleep(ms) {
     const seq = _animSeq;
     const tick = () => {
       if (seq !== _animSeq) { resolve(); return; }
-      if (_paused) { _pauseResolve = resolve; return; } // 일시정지 시 resolve 보류
+      if (_manualJump >= 0) { resolve(); return; }
+      if (_paused) { _pauseResolve = resolve; return; }
       resolve();
     };
     setTimeout(tick, ms);
@@ -386,6 +405,8 @@ function _sleep(ms) {
 }
 
 function _updateControls(sceneIdx, totalScenes) {
+  _currentSceneIdx = sceneIdx;
+  _totalScenes = totalScenes;
   const scene = $('#cinema-scene');
   const progress = $('#cinema-progress');
   if (scene) scene.textContent = `${sceneIdx + 1} / ${totalScenes}`;
@@ -465,17 +486,53 @@ export async function animateText(container, callbacks) {
     ctrl.classList.remove('hidden');
     const icon = $('#cinema-icon');
     if (icon) icon.setAttribute('icon', 'solar:pause-linear');
-    // 전문보기 버튼
     const stopBtn = $('#cinema-stop');
     if (stopBtn) stopBtn.onclick = () => exitCinematic(container, blocks);
-    // 재생/일시정지 버튼
     const toggleBtn = $('#cinema-toggle');
     if (toggleBtn) toggleBtn.onclick = togglePause;
+    // 수동 넘기기 버튼
+    const prevBtn = $('#cinema-prev-scene');
+    if (prevBtn) prevBtn.onclick = () => jumpScene(-1);
+    const nextBtn = $('#cinema-next-scene');
+    if (nextBtn) nextBtn.onclick = () => jumpScene(1);
   }
+  _manualJump = -1;
   _updateControls(0, scenes.length);
 
-  for (let i = 0; i < scenes.length; i++) {
+  /** 장면 하나를 화면에 표시 */
+  const showScene = (i) => {
+    const scene = scenes[i];
+    const isLast = i === scenes.length - 1;
+    blocks.forEach(b => {
+      b.style.display = 'none';
+      b.classList.remove('scene-final');
+    });
+    scene.forEach(b => {
+      b.style.display = '';
+      if (isLast) b.classList.add('scene-final');
+    });
+    _updateControls(i, scenes.length);
+  };
+
+  let i = 0;
+  while (i < scenes.length) {
     if (cancelled()) return;
+
+    // 수동 점프 요청 처리
+    if (_manualJump >= 0) {
+      i = _manualJump;
+      _manualJump = -1;
+      container.style.opacity = '0';
+      await _sleep(200);
+      if (cancelled()) return;
+      showScene(i);
+      await _sleep(30);
+      container.style.opacity = '1';
+      if (cb.onScene) cb.onScene();
+      // 수동 모드: 다음 점프 대기 (pause 상태)
+      await _sleep(100);
+      continue;
+    }
 
     const scene = scenes[i];
     const isLast = i === scenes.length - 1;
@@ -485,33 +542,24 @@ export async function animateText(container, callbacks) {
     if (i > 0 && cb.onTransition) cb.onTransition();
     await _sleep(i === 0 ? 300 : 600);
     if (cancelled()) return;
+    if (_manualJump >= 0) continue;
 
-    // [장면 교체] 이전 블록 숨기고 현재 블록 표시
-    blocks.forEach(b => {
-      b.style.display = 'none';
-      b.classList.remove('scene-final');
-    });
-    scene.forEach(b => {
-      b.style.display = '';
-      if (isLast) b.classList.add('scene-final');
-    });
+    // [장면 교체]
+    showScene(i);
 
     // [페이드 인] 새 장면 등장
     await _sleep(30);
     if (cancelled()) return;
     container.style.opacity = '1';
-    _updateControls(i, scenes.length);
     if (cb.onScene) cb.onScene();
     if (isLast && cb.onFinal) cb.onFinal();
 
     // [머무름] 글자 수에 비례한 읽기 시간
-    if (!isLast) {
-      const textLen = scene.reduce((sum, b) => sum + b.textContent.length, 0);
-      // 짧은 장면: 3초, 긴 장면: 글자당 50ms, 최대 15초
-      const displayTime = Math.min(Math.max(textLen * 50, 3000), 15000);
-      await _sleep(displayTime);
-    }
-    // 마지막 장면은 화면에 영구히 남음 (은은한 광채)
+    const textLen = scene.reduce((sum, b) => sum + b.textContent.length, 0);
+    const displayTime = Math.min(Math.max(textLen * 50, 3000), 15000);
+    await _sleep(isLast ? 999999 : displayTime);
+    if (_manualJump >= 0) continue;
+    i++;
   }
 }
 
