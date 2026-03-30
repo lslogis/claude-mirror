@@ -306,7 +306,7 @@ export function renderBookSpines(list, activeFile, onSelect, onHover) {
     html += `
       <div class="book-card group cursor-pointer rounded-xl p-4 transition-all duration-300 hover:bg-dawn-400/[0.04] ${isActive ? 'bg-dawn-400/[0.06]' : ''}"
         data-dir="${b.dirPath}" data-file="${b.filename}"
-        style="border: 1px solid rgba(200,168,120,0.06); animation: fadeInUp 400ms ease ${i * 50}ms both; opacity: 0;"
+        style="background: rgba(10,8,20,0.45); border: 1px solid rgba(200,168,120,0.08); animation: fadeInUp 400ms ease ${i * 50}ms both; opacity: 0;"
         role="listitem" tabindex="0">
         <div class="flex items-start gap-3">
           <span class="text-[10px] tracking-[0.2em] opacity-30 pt-0.5 shrink-0" style="color: #a09890;">${b.id.slice(0, 3)}</span>
