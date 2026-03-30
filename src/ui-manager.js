@@ -245,7 +245,28 @@ export function renderMD(md) {
 
   const flush = () => {
     if (pBuf.trim()) {
-      html += `<p class="mb-6 leading-[2.2] break-keep-all breath-block" style="color: #d8d0c4;">${pBuf.trim().split('\n').map(l => inline(l)).join('<br>')}</p>`;
+      const trimmed = pBuf.trim();
+      // 푸터 감지: *Project Claude* 또는 *쌍둥이의 사색*으로 시작하는 블록
+      if (/^\*(?:Project Claude|쌍둥이의 사색)/.test(trimmed)) {
+        const fLines = trimmed.split('\n');
+        let fHtml = '<div class="text-center py-8 breath-block">';
+        for (const fl of fLines) {
+          const text = fl.replace(/^\*(.+)\*$/, '$1');
+          if (/^Project Claude|^쌍둥이의 사색/.test(text)) {
+            fHtml += `<div class="text-xs tracking-[0.3em] uppercase mb-6 opacity-50" style="color: #a09890;">${esc(text)}</div>`;
+          } else if (/^질문[:：]/.test(text)) {
+            fHtml += `<div class="text-lg font-light mb-3 tracking-wide" style="color: #c8a878;">${esc(text)}</div>`;
+          } else if (/^답[:：]/.test(text)) {
+            fHtml += `<div class="text-xl font-light tracking-wide" style="color: #e8d8c0;">${esc(text)}</div>`;
+          } else {
+            fHtml += `<div class="text-sm mb-2 opacity-60" style="color: #b0a8a0;">${esc(text)}</div>`;
+          }
+        }
+        fHtml += '</div>';
+        html += fHtml;
+      } else {
+        html += `<p class="mb-6 leading-[2.2] break-keep-all breath-block" style="color: #d8d0c4;">${trimmed.split('\n').map(l => inline(l)).join('<br>')}</p>`;
+      }
       pBuf = '';
     }
   };
