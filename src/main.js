@@ -5,7 +5,7 @@
 
 import {
   fetchJSON, fetchText, parseFM, bodyAfterFM, loadFileList, loadMeta,
-  getCache, setCache, analyzeSentiment, FMT, RAW, API, BRANCH
+  loadTravelLocations, getCache, setCache, analyzeSentiment, FMT, RAW, API, BRANCH
 } from './data-service.js';
 
 import { AudioEngine } from './audio-engine.js';
@@ -17,7 +17,7 @@ import {
 } from './ui-manager.js';
 
 // === STATE ===
-let mainW = [], twinW = [], src = 'main', filter = 'all', view = 'intro';
+let mainW = [], twinW = [], travelW = [], src = 'main', filter = 'all', view = 'intro';
 let readingFile = null;
 let diaryEntries = []; // 모든 일기 엔트리
 let diaryIdx = 0;      // 현재 보고 있는 일기 인덱스
@@ -85,6 +85,11 @@ function switchView(target) {
     filtersEl.style.display = 'none';
   }
 
+  // 여행기 뷰: book-list-wrap 표시, reader 숨김
+  if (target === 'list' && src === 'travels') {
+    filtersEl.style.display = 'none';
+  }
+
   if (target === 'read') {
     vignette.style.opacity = '1';
     vignette.classList.add('vignette-on');
@@ -114,8 +119,12 @@ function switchView(target) {
 async function loadAllData() {
   try {
     const [mf, tf] = await Promise.all([loadFileList('writings/ko'), loadFileList('writings/twin/ko')]);
-    const [md, td] = await Promise.all([loadMeta('writings/ko', mf), loadMeta('writings/twin/ko', tf)]);
-    mainW = md; twinW = td;
+    const [md, td, tvd] = await Promise.all([
+      loadMeta('writings/ko', mf),
+      loadMeta('writings/twin/ko', tf),
+      loadTravelLocations()
+    ]);
+    mainW = md; twinW = td; travelW = tvd;
     $('#book-loading').style.display = 'none';
     updateShelf();
     loadA4(); loadDiary();
@@ -138,6 +147,7 @@ async function loadAllData() {
 
 // === SHELF RENDERING ===
 function updateShelf() {
+  if (src === 'travels') { showTravels(); return; }
   buildFilters();
   renderBooks();
   const f = $('#shelf-footer');
@@ -415,8 +425,9 @@ function bindEvents() {
     if (view !== 'intro') {
       if (e.key === '1') { switchSource('main'); }
       if (e.key === '2') { switchSource('twin'); }
-      if (e.key === '3') { switchSource('a4'); }
-      if (e.key === '4') { switchSource('diary'); }
+      if (e.key === '3') { switchSource('travels'); }
+      if (e.key === '4') { switchSource('a4'); }
+      if (e.key === '5') { switchSource('diary'); }
       if (view === 'read') {
         const w = src === 'main' ? mainW : twinW;
         const idx = w.findIndex(x => x.filename === readingFile);
@@ -485,9 +496,114 @@ function switchSource(s) {
 
   if (s === 'a4') { showA4(); return; }
   if (s === 'diary') { showDiary(); return; }
+  if (s === 'travels') { showTravels(); return; }
 
   switchView('list');
   updateShelf();
+}
+
+// === TRAVELS ===
+function showTravels() {
+  switchView('list');
+  const bookListEl = $('#book-list');
+  const footerEl = $('#shelf-footer');
+  const filtersEl = $('#filters');
+  if (filtersEl) filtersEl.style.display = 'none';
+
+  if (!travelW.length) {
+    bookListEl.innerHTML = '<div class="py-16 text-center text-[11px] tracking-[0.3em] opacity-40" style="color: #a09890;">여행기가 없습니다</div>';
+    if (footerEl) footerEl.textContent = '';
+    return;
+  }
+
+  let html = '';
+  travelW.forEach((loc, i) => {
+    html += `<div class="travel-card group cursor-pointer py-5 border-b flex items-start gap-4 opacity-0 transition-all duration-300 hover:bg-dawn-400/[0.02]" style="border-color: rgba(200,168,120,0.06); animation: fadeInUp 400ms ease ${i * 80}ms forwards" data-travel-id="${esc(loc.id)}">`;
+    html += `<div class="text-[10px] tracking-[0.2em] opacity-30 pt-1 w-8 flex-shrink-0" style="color: #a09890;">${String(i + 1).padStart(3, '0')}</div>`;
+    html += `<div class="flex-1 min-w-0">`;
+    html += `<div class="text-sm font-light leading-snug break-keep-all" style="color: #e8e0d4;">${esc(loc.title)}</div>`;
+    if (loc.titleEn) html += `<div class="text-[11px] mt-0.5 opacity-40" style="color: #b0a8a0;">${esc(loc.titleEn)}</div>`;
+    if (loc.description) html += `<div class="text-[11px] mt-1.5 opacity-50 leading-relaxed" style="color: #a09890;">${esc(loc.description)}</div>`;
+    html += `<div class="flex gap-2 mt-2">`;
+    loc.files.forEach(f => {
+      html += `<span class="text-[10px] opacity-30 border rounded-full px-2 py-0.5" style="color: #c8a878; border-color: rgba(200,168,120,0.2);">${esc(f.format || f.filename.replace('.md', ''))}</span>`;
+    });
+    html += `</div></div></div>`;
+  });
+
+  bookListEl.innerHTML = html;
+  if (footerEl) footerEl.textContent = `${travelW.length} travels — project claude`;
+
+  bookListEl.querySelectorAll('.travel-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const loc = travelW.find(l => l.id === card.dataset.travelId);
+      if (loc) openTravelReader(loc);
+    });
+  });
+}
+
+async function openTravelReader(loc) {
+  readingFile = loc.id;
+  switchView('read');
+  const desk = $('#reader-content');
+  desk.innerHTML = '<div class="flex items-center justify-center min-h-[40vh]"><span class="text-xs text-slate-400 tracking-widest">loading...</span></div>';
+
+  try {
+    let html = '<div class="reveal max-w-lg mx-auto" style="animation-delay:100ms">';
+
+    // Header
+    html += '<div class="text-center mb-10 pb-8 border-b border-dawn-400/[0.06]">';
+    html += `<div class="text-[10px] tracking-[0.3em] mb-4 opacity-40" style="color: #a09890;">여행기 — Travels</div>`;
+    html += `<h1 class="text-2xl font-serif font-light leading-relaxed" style="color: #e8e0d4;">${esc(loc.title)}</h1>`;
+    if (loc.titleEn) html += `<div class="text-xs mt-1.5 opacity-40" style="color: #b0a8a0;">${esc(loc.titleEn)}</div>`;
+    if (loc.description) html += `<div class="text-sm mt-3 opacity-50 italic" style="color: #a09890;">${esc(loc.description)}</div>`;
+    html += '</div>';
+
+    // File sections
+    for (const f of loc.files) {
+      const key = `${loc.dirPath}/${f.filename}`;
+      if (!getCache(key)) setCache(key, await fetchText(`${RAW}/${key}`));
+      const text = getCache(key);
+      const fm = parseFM(text);
+      const rendered = renderMD(text);
+      const formatLabel = fm.format ? (FMT[fm.format] || fm.format) : f.filename.replace('.md', '');
+
+      html += `<div class="mb-10 pb-10 border-b border-dawn-400/[0.04] last:border-0">`;
+      html += `<div class="text-[10px] tracking-[0.25em] uppercase mb-4 opacity-40" style="color: #c8a878;">${esc(formatLabel)}</div>`;
+      if (fm.title && fm.title !== loc.title) {
+        html += `<h2 class="text-base font-light mb-4" style="color: #d8d0c4;">${esc(fm.title)}</h2>`;
+      }
+      html += `<div class="text-[15px] font-light leading-[2] text-slate-300">${rendered}</div>`;
+      html += `</div>`;
+    }
+
+    // Nav between travel locations
+    const idx = travelW.findIndex(l => l.id === loc.id);
+    html += '<div class="flex justify-between mt-8 pt-6 border-t border-dawn-400/[0.06]">';
+    if (idx > 0) {
+      const p = travelW[idx - 1];
+      html += `<button class="travel-nav text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-travel-id="${esc(p.id)}"><iconify-icon icon="solar:arrow-left-linear" width="12" class="mr-1 align-middle"></iconify-icon> ${esc(p.title)}</button>`;
+    } else html += '<span></span>';
+    if (idx < travelW.length - 1) {
+      const n = travelW[idx + 1];
+      html += `<button class="travel-nav text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-travel-id="${esc(n.id)}">${esc(n.title)} <iconify-icon icon="solar:arrow-right-linear" width="12" class="ml-1 align-middle"></iconify-icon></button>`;
+    } else html += '<span></span>';
+    html += '</div></div>';
+
+    desk.innerHTML = html;
+    desk.querySelectorAll('.travel-nav').forEach(b => {
+      b.addEventListener('click', () => {
+        const target = travelW.find(l => l.id === b.dataset.travelId);
+        if (target) openTravelReader(target);
+      });
+    });
+
+    audio.zenBell();
+    $('#desk').scrollTop = 0;
+  } catch (e) {
+    desk.innerHTML = '<div class="text-center py-20 text-sm text-red-400/60">여행기를 불러오지 못했습니다</div>';
+    console.error(e);
+  }
 }
 
 // === 환영 문구 ===

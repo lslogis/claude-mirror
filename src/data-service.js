@@ -112,6 +112,38 @@ export async function loadMeta(dir, files) {
   return results.filter(Boolean);
 }
 
+// === 여행기 로딩 ===
+export async function loadTravelLocations() {
+  try {
+    const items = await fetchJSON(`${API}/writings/twin/travels?ref=${BRANCH}`);
+    const dirs = items.filter(i => i.type === 'dir').sort((a, b) => a.name.localeCompare(b.name));
+    const results = await Promise.all(dirs.map(async d => {
+      const dir = `writings/twin/travels/${d.name}`;
+      const fileOrder = ['info.md', 'feelings.md', 'poem.md', 'essay.md'];
+      const files = await Promise.all(fileOrder.map(async fn => {
+        try {
+          const text = await fetchText(`${RAW}/${dir}/${fn}`);
+          cache[`${dir}/${fn}`] = text;
+          const fm = parseFM(text);
+          return { filename: fn, dirPath: dir, title: fm.title || fn, titleEn: fm.title_en || '', format: FMT[fm.format] || fm.format || '' };
+        } catch { return null; }
+      }));
+      const valid = files.filter(Boolean);
+      const infoText = cache[`${dir}/info.md`] || '';
+      const infoFM = parseFM(infoText);
+      return {
+        id: d.name,
+        dirPath: dir,
+        title: infoFM.title || d.name,
+        titleEn: infoFM.title_en || '',
+        description: infoFM.description || '',
+        files: valid
+      };
+    }));
+    return results.filter(Boolean);
+  } catch (e) { console.warn('travels load failed', e); return []; }
+}
+
 // === 캐시 ===
 export function getCache(key) { return cache[key]; }
 export function setCache(key, val) { cache[key] = val; }
