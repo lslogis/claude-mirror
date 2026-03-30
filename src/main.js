@@ -228,31 +228,41 @@ async function openReader(dir, file) {
 
     html += `<div class="reveal text-[15px] md:text-base font-light leading-[2] text-slate-300" style="animation-delay:250ms" id="reader-body">${rendered}</div>`;
 
-    // Nav — 본문과 충분한 간격
-    html += '<div class="flex justify-between mt-24 mb-16 pt-6 border-t border-dawn-400/[0.06] reveal" style="animation-delay:400ms">';
-    if (idx > 0) {
-      const p = w[idx - 1];
-      html += `<button class="nav-btn text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-dir="${p.dirPath}" data-file="${p.filename}"><iconify-icon icon="solar:arrow-left-linear" width="12" class="mr-1 align-middle"></iconify-icon> ${esc(p.title)}</button>`;
-    } else html += '<span></span>';
-    if (idx < w.length - 1) {
-      const n = w[idx + 1];
-      html += `<button class="nav-btn text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-dir="${n.dirPath}" data-file="${n.filename}">${esc(n.title)} <iconify-icon icon="solar:arrow-right-linear" width="12" class="ml-1 align-middle"></iconify-icon></button>`;
-    }
-    html += '</div>';
+    // 본문 하단 여백 (하단 바 공간 확보)
+    html += '<div class="h-16"></div>';
 
     desk.innerHTML = html;
-    desk.querySelectorAll('.nav-btn').forEach(b => b.onclick = () => openReader(b.dataset.dir, b.dataset.file));
 
-    // 이전/다음 글 버튼 연결
-    const prevBtn = $('#cinema-prev');
-    const nextBtn = $('#cinema-next');
-    if (prevBtn) {
-      prevBtn.disabled = idx <= 0;
-      prevBtn.onclick = idx > 0 ? () => openReader(w[idx - 1].dirPath, w[idx - 1].filename) : null;
+    // 통합 하단 바 — 이전/다음 글 연결
+    const bottomBar = $('#reader-bottom-bar');
+    const barPrev = $('#bar-prev');
+    const barNext = $('#bar-next');
+    const barPrevTitle = $('#bar-prev-title');
+    const barNextTitle = $('#bar-next-title');
+
+    if (bottomBar) bottomBar.classList.remove('hidden');
+
+    if (barPrev && barPrevTitle) {
+      if (idx > 0) {
+        const p = w[idx - 1];
+        barPrev.disabled = false;
+        barPrevTitle.textContent = p.title;
+        barPrev.onclick = () => openReader(p.dirPath, p.filename);
+      } else {
+        barPrev.disabled = true;
+        barPrevTitle.textContent = '';
+      }
     }
-    if (nextBtn) {
-      nextBtn.disabled = idx >= w.length - 1;
-      nextBtn.onclick = idx < w.length - 1 ? () => openReader(w[idx + 1].dirPath, w[idx + 1].filename) : null;
+    if (barNext && barNextTitle) {
+      if (idx < w.length - 1) {
+        const n = w[idx + 1];
+        barNext.disabled = false;
+        barNextTitle.textContent = n.title;
+        barNext.onclick = () => openReader(n.dirPath, n.filename);
+      } else {
+        barNext.disabled = true;
+        barNextTitle.textContent = '';
+      }
     }
 
     // 영감의 종소리 — 새 글의 시작
@@ -278,6 +288,8 @@ async function openReader(dir, file) {
 function closeReader() {
   switchView('list');
   renderBooks();
+  const bottomBar = $('#reader-bottom-bar');
+  if (bottomBar) bottomBar.classList.add('hidden');
 }
 
 // === A4 ===

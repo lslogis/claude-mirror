@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__browser__open",
+      "mcp__browser__playwright",
+      "mcp__browser__screenshot",
+      "mcp__browser__console_logs",
+      "mcp__browser__network_requests",
+      "mcp__browser__close",
+      "Bash(python -m http.server 8765)"
+    ]
+  }
+}
