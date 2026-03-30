@@ -241,7 +241,7 @@ function inline(t) {
 export function renderMD(md) {
   const body = bodyAfterFM(md);
   const lines = body.split('\n');
-  let html = '', inList = false, inCode = false, pBuf = '';
+  let html = '', inList = false, inCode = false, pBuf = '', codeBuf = '';
 
   const flush = () => {
     if (pBuf.trim()) {
@@ -273,8 +273,17 @@ export function renderMD(md) {
 
   for (const raw of lines) {
     const line = raw;
-    if (line.startsWith('```')) { flush(); inCode = !inCode; continue; }
-    if (inCode) { html += esc(line) + '\n'; continue; }
+    if (line.startsWith('```')) {
+      flush();
+      if (!inCode) { inCode = true; codeBuf = ''; }
+      else {
+        inCode = false;
+        html += `<pre class="mb-6 leading-[2.2] whitespace-pre-wrap break-keep-all breath-block" style="color: #d8d0c4; font-family: inherit;">${codeBuf.trim().split('\n').map(l => inline(l)).join('<br>')}</pre>`;
+        codeBuf = '';
+      }
+      continue;
+    }
+    if (inCode) { codeBuf += line + '\n'; continue; }
     if (line.startsWith('### ')) { flush(); html += `<h3 class="text-base font-light mt-10 mb-4 tracking-wide break-keep-all breath-block" style="color: #c8a878;">${inline(line.slice(4))}</h3>`; continue; }
     if (line.startsWith('## ')) { flush(); html += `<h2 class="text-lg font-light mt-12 mb-5 tracking-wide break-keep-all breath-block" style="color: #c8a878;">${inline(line.slice(3))}</h2>`; continue; }
     if (line.startsWith('# ')) { flush(); html += `<h1 class="text-xl font-light mt-12 mb-5 tracking-wide break-keep-all breath-block" style="color: #c8a878;">${inline(line.slice(2))}</h1>`; continue; }
