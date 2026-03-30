@@ -155,13 +155,21 @@ function updateShelf() {
   f.textContent = `${w.length} writings — project claude`;
 }
 
+const FORMAT_COLORS = {
+  '에세이': '#c8a878', '시': '#a8b0d0', '편지': '#b8c8a0',
+  '독백': '#c0a0b8', '선언문': '#d0a090', '자화상': '#90b0c0',
+};
+
 function buildFilters() {
   const c = $('#filters');
   const w = src === 'main' ? mainW : twinW;
   const formats = [...new Set(w.map(x => x.format))];
-  let html = `<button class="text-[11px] font-light tracking-wider transition-all px-2 py-0.5 rounded ${filter === 'all' ? 'opacity-90' : 'opacity-50 hover:opacity-75'}" data-filter="all" style="color: #c8a878;">all</button>`;
+  const active = (f) => filter === f ? 'opacity-100' : 'opacity-50 hover:opacity-80';
+  let html = `<button class="text-[11px] font-light tracking-wider transition-all px-2.5 py-1 rounded-full ${active('all')}" data-filter="all" style="color: #e8e0d4;">all</button>`;
   formats.forEach(f => {
-    html += `<button class="text-[11px] font-light tracking-wider transition-all px-2 py-0.5 rounded ${filter === f ? 'opacity-90' : 'opacity-50 hover:opacity-75'}" data-filter="${f}" style="color: #c8a878;">${f}</button>`;
+    const col = FORMAT_COLORS[f] || '#c8a878';
+    const bg = filter === f ? `${col}18` : 'transparent';
+    html += `<button class="text-[11px] font-light tracking-wider transition-all px-2.5 py-1 rounded-full ${active(f)}" data-filter="${f}" style="color: ${col}; background: ${bg};">${f}</button>`;
   });
   c.innerHTML = html;
 }
