@@ -1,0 +1,11 @@
+.git
+.wrangler
+.expect
+.gitignore
+.impeccable.md
+scripts
+node_modules
+wrangler.jsonc
+worker.js
+package.json
+package-lock.json
