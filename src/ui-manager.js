@@ -298,39 +298,42 @@ export function renderBookSpines(list, activeFile, onSelect, onHover) {
     return;
   }
 
-  let html = '';
+  let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">';
   list.forEach((b, i) => {
     const isActive = activeFile === b.filename;
     const spineColor = SPINE_COLORS[b.format] || '#c8a878';
-    const sentimentHue = b.sentiment != null ? (b.sentiment > 0 ? 'warm' : b.sentiment < 0 ? 'cool' : '') : '';
 
     html += `
-      <div class="book-spine ${isActive ? 'book-spine-active' : ''}"
-        data-dir="${b.dirPath}" data-file="${b.filename}" data-sentiment="${b.sentiment || 0}"
-        style="animation: spineSlideIn 400ms cubic-bezier(0.16,1,0.3,1) ${i * 35}ms both;"
+      <div class="book-card group cursor-pointer rounded-xl p-4 transition-all duration-300 hover:bg-dawn-400/[0.04] ${isActive ? 'bg-dawn-400/[0.06]' : ''}"
+        data-dir="${b.dirPath}" data-file="${b.filename}"
+        style="border: 1px solid rgba(200,168,120,0.06); animation: fadeInUp 400ms ease ${i * 50}ms both; opacity: 0;"
         role="listitem" tabindex="0">
-        <div class="book-spine-bar" style="background: ${spineColor};"></div>
-        <div class="book-spine-body">
-          <span class="book-spine-num">${b.id.slice(0, 3)}</span>
-          <span class="book-spine-title">${esc(b.title)}</span>
+        <div class="flex items-start gap-3">
+          <span class="text-[10px] tracking-[0.2em] opacity-30 pt-0.5 shrink-0" style="color: #a09890;">${b.id.slice(0, 3)}</span>
+          <div class="flex-1 min-w-0">
+            <div class="text-sm font-light leading-snug break-keep-all group-hover:text-dawn-200 transition-colors" style="color: #e8e0d4;">${esc(b.title)}</div>
+            ${b.titleEn ? `<div class="text-[11px] mt-0.5 opacity-35" style="color: #b0a8a0;">${esc(b.titleEn)}</div>` : ''}
+            ${b.description ? `<div class="text-[10px] mt-1.5 opacity-40 leading-relaxed line-clamp-2" style="color: #a09890;">${esc(b.description)}</div>` : ''}
+            <span class="inline-block text-[9px] mt-2 opacity-40 border rounded-full px-2 py-0.5" style="color: ${spineColor}; border-color: ${spineColor}40;">${esc(b.format)}</span>
+          </div>
         </div>
-        <span class="book-spine-format" style="color: ${spineColor};">${esc(b.format)}</span>
       </div>`;
   });
+  html += '</div>';
   el.innerHTML = html;
 
   // 이벤트 바인딩
-  el.querySelectorAll('.book-spine').forEach(spine => {
-    spine.addEventListener('click', () => {
-      onSelect(spine.dataset.dir, spine.dataset.file);
+  el.querySelectorAll('.book-card').forEach(card => {
+    card.addEventListener('click', () => {
+      onSelect(card.dataset.dir, card.dataset.file);
     });
-    spine.addEventListener('keydown', e => {
+    card.addEventListener('keydown', e => {
       if (e.code === 'Enter' || e.code === 'Space') {
         e.preventDefault();
-        onSelect(spine.dataset.dir, spine.dataset.file);
+        onSelect(card.dataset.dir, card.dataset.file);
       }
     });
-    spine.addEventListener('mouseenter', () => {
+    card.addEventListener('mouseenter', () => {
       if (onHover) onHover();
     });
   });
