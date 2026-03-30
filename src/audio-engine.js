@@ -313,6 +313,20 @@ export class AudioEngine {
     });
   }
 
+  /** 음소거 토글 — masterGain을 0으로 */
+  toggleMute() {
+    if (!this.masterGain) return false;
+    const now = this.ctx.currentTime;
+    if (this.masterGain.gain.value > 0.01) {
+      this._prevMasterGain = this.masterGain.gain.value;
+      this.masterGain.gain.linearRampToValueAtTime(0, now + 0.3);
+      return true; // muted
+    } else {
+      this.masterGain.gain.linearRampToValueAtTime(this._prevMasterGain || 1, now + 0.3);
+      return false; // unmuted
+    }
+  }
+
   /** 슬라이더 연동 */
   setRainVolume(val) {
     if (this.rainGain) this.rainGain.gain.value = val / 100 * 0.3;

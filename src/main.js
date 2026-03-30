@@ -474,16 +474,20 @@ function bindEvents() {
     switchSource('main');
   });
 
-  // Sound
-  $('#sound-btn').addEventListener('click', () => {
-    const panel = $('#sound-panel');
-    panel.classList.toggle('hidden');
+  // Sound — 클릭: 음소거 토글, 첫 클릭 시 오디오 초기화+재생
+  const soundBtn = $('#sound-btn');
+  const soundIcon = soundBtn?.querySelector('iconify-icon');
+  soundBtn.addEventListener('click', () => {
     if (!audio.started) {
       audio.init();
       const rSlider = $('#vol-rain');
       const wSlider = $('#vol-wind');
       audio.setInitialVolumes(rSlider?.value || 40, wSlider?.value || 20);
+      if (soundIcon) soundIcon.setAttribute('icon', 'solar:volume-loud-linear');
+      return;
     }
+    const muted = audio.toggleMute();
+    if (soundIcon) soundIcon.setAttribute('icon', muted ? 'solar:volume-cross-linear' : 'solar:volume-loud-linear');
   });
   $('#sound-close')?.addEventListener('click', () => {
     $('#sound-panel').classList.add('hidden');
