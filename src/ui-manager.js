@@ -245,7 +245,7 @@ export function renderMD(md) {
 
   const flush = () => {
     if (pBuf.trim()) {
-      html += `<p class="mb-6 leading-[2.2] break-keep-all breath-block" style="color: #d8d0c4;">${inline(pBuf.trim())}</p>`;
+      html += `<p class="mb-6 leading-[2.2] break-keep-all breath-block" style="color: #d8d0c4;">${pBuf.trim().split('\n').map(l => inline(l)).join('<br>')}</p>`;
       pBuf = '';
     }
   };
@@ -267,7 +267,7 @@ export function renderMD(md) {
     }
     if (inList) { html += '</ul>'; inList = false; }
     if (!line.trim()) { flush(); continue; }
-    pBuf += (pBuf ? ' ' : '') + line;
+    pBuf += (pBuf ? '\n' : '') + line;
   }
   flush();
   if (inList) html += '</ul>';
