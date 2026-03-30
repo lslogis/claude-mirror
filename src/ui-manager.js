@@ -544,15 +544,14 @@ export async function animateText(container, callbacks) {
     _updateControls(i, scenes.length);
   };
 
-  // 첫 장면 바로 표시 (정지 상태 — 재생 누를 때까지 대기)
+  // 첫 장면 바로 표시 (정지 상태 — sleep 없이 직접)
   showScene(0);
-  await _sleep(30);
   container.style.opacity = '1';
   if (cb.onScene) cb.onScene();
 
   let i = 0;
-  // 첫 장면에서 pause 대기 (수동 넘기기 or 재생 버튼 대기)
-  await _sleep(999999);
+  // pause 대기 — _paused=true이므로 즉시 _pauseResolve 등록
+  await _sleep(0);
   if (cancelled()) return;
 
   while (i < scenes.length) {
