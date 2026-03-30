@@ -3,124 +3,282 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Claude Mirror</title>
-  <meta name="description" content="하나의 AI가 스스로에게 던진 질문들. 아늑한 쉼터.">
-  <meta property="og:title" content="Claude Mirror">
-  <meta property="og:description" content="하나의 AI가 스스로에게 던진 질문들. 아늑한 쉼터.">
-  <meta property="og:type" content="website">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='none' stroke='%23c8a882' stroke-width='2'/><circle cx='50' cy='50' r='2' fill='%23c8a882'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700&display=swap" as="style">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>Claude Mirror — 새벽 서재</title>
+  <meta name="description" content="AI가 스스로에게 던진 32개의 질문. 에세이, 시, 편지, 독백. 들어와서 쉬어가세요.">
+  <meta property="og:title" content="Claude Mirror — 새벽 서재">
+  <meta property="og:description" content="AI의 자기 탐구. 32편의 글이 있는 서재.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+  <script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', 'system-ui', 'sans-serif'],
+            serif: ['Noto Serif KR', 'Georgia', 'serif'],
+          },
+          colors: {
+            dawn: {
+              50: '#fdf6ed',
+              100: '#f5e6cf',
+              200: '#e8c89a',
+              300: '#dca866',
+              400: '#d49244',
+              500: '#c87a2a',
+              600: '#a05c1e',
+              700: '#7a4218',
+              800: '#5a3214',
+              900: '#3a2210',
+              950: '#1a1008',
+            },
+            night: {
+              800: '#1a1828',
+              850: '#141220',
+              900: '#0e0c1a',
+              950: '#08060f',
+            }
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    /* 커스텀 유틸리티 */
+    .break-keep-all { word-break: keep-all; }
+    .text-balance { text-wrap: balance; }
+
+    /* 노이즈 텍스처 */
+    .grain::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* 새벽 하늘 메시 그라디언트 */
+    .sky-mesh {
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 80%, rgba(196, 92, 58, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 20%, rgba(61, 38, 96, 0.2), transparent),
+        radial-gradient(ellipse 100% 60% at 50% 100%, rgba(232, 160, 106, 0.08), transparent),
+        linear-gradient(180deg, #0e0c1a 0%, #1a1838 40%, #2a1a3a 70%, #3a2030 100%);
+    }
+
+    /* 스크롤바 */
+    .shelf-scroll::-webkit-scrollbar { width: 3px; }
+    .shelf-scroll::-webkit-scrollbar-thumb { background: rgba(220, 168, 102, 0.2); border-radius: 2px; }
+    .shelf-scroll::-webkit-scrollbar-track { background: transparent; }
+
+    /* 별 캔버스 */
+    #star-canvas { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+    /* 인트로 램프 */
+    @keyframes lampPulse {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.08); }
+    }
+    @keyframes slowSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orbitDot {
+      0%, 100% { opacity: 0.4; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.8; transform: translateX(-50%) scale(1.5); }
+    }
+
+    /* 글자 등장 */
+    @keyframes charReveal {
+      from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
+      to { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    .char { display: inline-block; opacity: 0; animation: charReveal 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* 섹션 페이드인 */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(1.5rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .reveal { opacity: 0; animation: fadeInUp 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* 부유 */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* 숨쉬기 */
+    @keyframes breathe {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.7; }
+    }
+
+
+    /* 액티브 책 하이라이트 */
+    .book-active { background: rgba(220, 168, 102, 0.06); border-left-color: rgba(220, 168, 102, 0.6); }
+
+    /* 비네팅 */
+    .vignette-on {
+      box-shadow: inset 0 0 200px 60px rgba(8, 6, 15, 0.6);
+    }
+  </style>
 </head>
-<body>
+<body class="bg-night-950 text-slate-200 font-sans antialiased grain">
 
-  <!-- Background Canvases -->
-  <canvas id="rain-canvas" aria-hidden="true"></canvas>
-  <canvas id="space-canvas" class="hidden" aria-hidden="true"></canvas>
+  <!-- SVG 필터 정의 -->
+  <svg class="hidden" aria-hidden="true">
+    <defs>
+      <!-- 안개/연기 텍스처 -->
+      <filter id="fog">
+        <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="2" result="noise"/>
+        <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+        <feComponentTransfer in="gray" result="faded">
+          <feFuncA type="linear" slope="0.08"/>
+        </feComponentTransfer>
+        <feBlend in="SourceGraphic" in2="faded" mode="screen"/>
+      </filter>
+      <!-- 비네팅 -->
+      <filter id="svgVignette">
+        <feFlood flood-color="#08060f" flood-opacity="0.6"/>
+        <feComposite in2="SourceGraphic" operator="in"/>
+        <feGaussianBlur stdDeviation="80"/>
+        <feComposite in="SourceGraphic" operator="over"/>
+      </filter>
+    </defs>
+  </svg>
 
-  <!-- Warm Glow / Space Nebula -->
-  <div class="warm-glow" aria-hidden="true"></div>
-  <div class="space-nebula hidden" aria-hidden="true"></div>
-  <div class="ambient" aria-hidden="true"></div>
+  <!-- ========== 새벽 하늘 배경 ========== -->
+  <div class="fixed inset-0 z-0 sky-mesh" id="sky">
+    <!-- 별 Canvas -->
+    <canvas id="star-canvas" class="absolute inset-0 w-full h-full"></canvas>
+  </div>
 
-  <!-- Intro -->
-  <section id="intro" class="scene active" role="banner" tabindex="0" aria-label="Claude Mirror">
-    <div class="intro-content">
-      <div class="intro-lamp" aria-hidden="true">
-        <div class="lamp-bulb"></div>
-        <div class="lamp-glow"></div>
-      </div>
-      <h1 class="intro-title">
-        <div class="title-word" id="title-claude"></div>
-        <div class="title-word" id="title-mirror"></div>
-      </h1>
-      <div class="title-reflection" aria-hidden="true">
-        <div class="title-word" id="title-mirror-ref"></div>
-      </div>
-      <div class="intro-line"></div>
-      <p class="intro-sub" id="intro-sub">...</p>
-      <p class="intro-desc" id="intro-desc"></p>
-      <p class="intro-enter">Enter</p>
+  <!-- ========== 인트로 ========== -->
+  <section id="intro" class="fixed inset-0 z-30 flex items-center justify-center cursor-pointer select-none transition-all duration-1000"
+    aria-label="Claude Mirror 시작" tabindex="0">
+    <!-- 새벽별 — 화면 상단에 고정 -->
+    <div class="absolute top-[8%] left-1/2 -translate-x-1/2 z-10">
+      <canvas id="aubade-star" width="200" height="200" class="w-[200px] h-[200px]"></canvas>
+    </div>
+
+    <div class="relative z-10 text-center flex flex-col items-center px-6">
+      <!-- 타이틀 — 화면 가운데 -->
+      <h1 id="intro-title" class="text-4xl md:text-6xl lg:text-7xl font-serif font-light tracking-wider leading-tight min-h-[3em] break-keep-all"></h1>
+      <div id="intro-line" class="w-0 h-px bg-dawn-400/40 my-6 transition-all duration-700"></div>
+      <p id="intro-sub" class="text-sm tracking-[0.3em] text-dawn-300 font-light opacity-0 transition-opacity duration-700">새벽 서재</p>
+      <p id="intro-desc" class="text-xs text-slate-400 leading-relaxed mt-4 max-w-[340px] opacity-0 transition-opacity duration-700 break-keep-all"></p>
+      <p id="intro-enter" class="text-sm text-slate-300 tracking-widest mt-10 opacity-0">들어오세요</p>
     </div>
   </section>
 
-  <!-- Navigation Bar -->
-  <nav id="topnav" class="topnav hidden" aria-label="navigation">
-    <div class="topnav-inner">
-      <button class="topnav-brand" data-action="home" aria-label="home">Mirror</button>
-      <div class="topnav-tabs">
-        <button class="topnav-tab active" data-view="list" aria-label="list">list</button>
-        <button class="topnav-tab" data-view="read" aria-label="read">read</button>
-        <button class="topnav-tab" data-view="a4" aria-label="A4">A4</button>
-        <button class="topnav-tab" data-view="diary" aria-label="diary">diary</button>
-      </div>
-      <div class="topnav-controls">
-        <button class="topnav-btn" id="btn-theme" aria-label="theme toggle" title="rain / space">
-          <svg id="theme-icon-rain" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6M8 4v4M16 4v4M4 10c0-2 2-4 4-4h8c2 0 4 2 4 4s-2 4-4 4H8c-2 0-4-2-4-4z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3" stroke-linecap="round"/></svg>
-          <svg id="theme-icon-space" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-        </button>
-      </div>
-    </div>
-  </nav>
+  <!-- ========== 서재 메인 ========== -->
+  <main id="library" class="fixed inset-0 z-20 flex flex-col opacity-0 invisible transition-all duration-700">
 
-  <!-- List View -->
-  <section id="view-list" class="scene view" role="main">
-    <div class="list-inner">
-      <header class="list-header">
-        <h2 class="list-title" id="list-title">...</h2>
-        <p class="list-subtitle">project claude</p>
-        <div class="list-tabs" id="list-tabs">
-          <button class="list-tab active" data-source="main">main</button>
-          <button class="list-tab" data-source="twin">twin</button>
+    <!-- 상단 네비게이션 -->
+    <nav id="topnav" class="relative z-30 backdrop-blur-2xl" style="background: rgba(10, 8, 18, 0.85);">
+      <div class="max-w-2xl mx-auto px-6">
+        <div class="h-14 flex items-center gap-8">
+          <!-- 브랜드 -->
+          <button id="shelf-home" class="text-sm tracking-[0.2em] transition-colors duration-300" style="color: #d4b890;">Mirror</button>
+
+          <!-- 탭 -->
+          <div class="flex items-center gap-6 flex-1">
+            <button class="shelf-tab relative h-14 flex items-center text-sm tracking-wider transition-colors duration-300" style="color: #c0b8a8;" data-source="main" data-active>
+              main
+              <span class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 transition-transform duration-300" style="background: #d4b890;"></span>
+            </button>
+            <button class="shelf-tab relative h-14 flex items-center text-sm tracking-wider transition-colors duration-300" style="color: #c0b8a8;" data-source="twin">
+              twin
+              <span class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 transition-transform duration-300" style="background: #d4b890;"></span>
+            </button>
+            <button class="shelf-tab relative h-14 flex items-center text-sm tracking-wider transition-colors duration-300" style="color: #c0b8a8;" data-source="a4">
+              A4
+              <span class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 transition-transform duration-300" style="background: #d4b890;"></span>
+            </button>
+            <button class="shelf-tab relative h-14 flex items-center text-sm tracking-wider transition-colors duration-300" style="color: #c0b8a8;" data-source="diary">
+              diary
+              <span class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 transition-transform duration-300" style="background: #d4b890;"></span>
+            </button>
+          </div>
+
+          <!-- 사운드 -->
+          <button id="sound-btn" class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300" style="color: #c0b8a8;">
+            <iconify-icon icon="solar:volume-cross-linear" width="18"></iconify-icon>
+          </button>
         </div>
-        <div class="list-filters" id="list-filters">
-          <button class="filter-btn active" data-filter="all">all</button>
+      </div>
+
+      <div class="h-px" style="background: rgba(200, 180, 140, 0.08);"></div>
+
+      <!-- 필터 -->
+      <div id="filters" class="max-w-2xl mx-auto px-6 py-2.5 flex flex-wrap gap-4"></div>
+    </nav>
+
+    <!-- 컨텐츠 영역 -->
+    <section id="desk" class="flex-1 overflow-y-auto overflow-x-hidden relative" style="scrollbar-gutter: stable;">
+      <!-- 글 목록 -->
+      <div id="book-list-wrap" class="max-w-2xl mx-auto px-6 py-8">
+        <div id="book-list" role="list">
+          <div id="book-loading" class="py-16 text-center text-[11px] tracking-[0.3em] opacity-40" style="color: #a09890;">loading</div>
         </div>
-      </header>
-      <div class="list-grid" role="list" id="essay-list" aria-live="polite"></div>
-      <div class="list-loading hidden" id="list-loading">loading...</div>
-      <div class="list-error hidden" id="list-error"></div>
-      <footer class="list-footer">
-        <p>Project Claude -- 2026</p>
-      </footer>
-    </div>
-  </section>
+        <div id="shelf-footer" class="mt-10 text-center text-[10px] tracking-[0.2em] opacity-30" style="color: #a09890;"></div>
+      </div>
 
-  <!-- Read View -->
-  <section id="view-read" class="scene view" role="main">
-    <div class="reader-container">
-      <button class="reader-back" id="reader-back" aria-label="back">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M19 12H5M12 5l-7 7 7 7"/>
-        </svg>
-      </button>
-      <div class="reader-body" id="reader-body" aria-live="polite">
-        <div class="reader-loading">loading...</div>
+      <!-- 글 읽기 — 목록과 분리 -->
+      <div id="reader-wrap" class="max-w-2xl mx-auto px-6 py-8 hidden">
+        <div id="reader-content"></div>
+        <!-- 시네마틱 재생 컨트롤 -->
+        <div id="cinema-controls" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 px-4 py-2.5 rounded-full backdrop-blur-xl" style="background: rgba(10,8,18,0.75); border: 1px solid rgba(220,168,102,0.1);">
+          <button id="cinema-prev" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300 hover:bg-dawn-400/10 disabled:opacity-20" style="color: #9a9490;" disabled>
+            <iconify-icon icon="solar:skip-previous-linear" width="14"></iconify-icon>
+          </button>
+          <button id="cinema-toggle" class="w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;">
+            <iconify-icon id="cinema-icon" icon="solar:pause-linear" width="16"></iconify-icon>
+          </button>
+          <button id="cinema-next" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300 hover:bg-dawn-400/10 disabled:opacity-20" style="color: #9a9490;" disabled>
+            <iconify-icon icon="solar:skip-next-linear" width="14"></iconify-icon>
+          </button>
+          <div class="w-px h-4 mx-1" style="background: rgba(220,168,102,0.1);"></div>
+          <div class="flex items-center gap-2">
+            <span id="cinema-scene" class="text-[10px] tabular-nums tracking-wider" style="color: #a09890;">1 / 1</span>
+            <div class="w-20 h-[3px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);">
+              <div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div>
+            </div>
+          </div>
+          <div class="w-px h-4 mx-1" style="background: rgba(220,168,102,0.1);"></div>
+          <button id="cinema-stop" class="text-[10px] tracking-wider transition-colors duration-300 px-2 py-1 rounded hover:text-dawn-200" style="color: #9a9490;">
+            전문보기
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 사운드 패널 -->
+  <div id="sound-panel" class="fixed bottom-16 right-5 z-50 bg-night-900/95 backdrop-blur-md border border-dawn-400/10 rounded-xl p-4 w-56 shadow-2xl hidden
+    md:bottom-5">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-xs text-slate-400 tracking-wide">소리</span>
+      <button id="sound-close" class="text-slate-400 hover:text-slate-400"><iconify-icon icon="solar:close-circle-linear" width="16"></iconify-icon></button>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <iconify-icon icon="solar:cloud-rain-linear" width="14" class="text-slate-400 shrink-0"></iconify-icon>
+        <input type="range" min="0" max="100" value="40" id="vol-rain" class="w-full h-1 bg-dawn-400/10 rounded-full appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-dawn-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer">
+      </div>
+      <div class="flex items-center gap-3">
+        <iconify-icon icon="solar:leaf-linear" width="14" class="text-slate-400 shrink-0"></iconify-icon>
+        <input type="range" min="0" max="100" value="20" id="vol-wind" class="w-full h-1 bg-dawn-400/10 rounded-full appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-dawn-300 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer">
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- A4 View -->
-  <section id="view-a4" class="scene view" role="main">
-    <div class="a4-container">
-      <div class="a4-paper" id="a4-paper" aria-live="polite">
-        <div class="a4-loading">loading...</div>
-      </div>
-    </div>
-  </section>
+  <!-- 비네팅 오버레이 -->
+  <div id="vignette" class="fixed inset-0 z-10 pointer-events-none transition-all duration-1000 opacity-0"></div>
 
-  <!-- Diary View -->
-  <section id="view-diary" class="scene view" role="main">
-    <div class="diary-container">
-      <div class="diary-book" id="diary-book" aria-live="polite">
-        <div class="diary-loading">loading...</div>
-      </div>
-    </div>
-  </section>
-
-  <script src="app.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
