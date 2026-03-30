@@ -509,7 +509,7 @@ export async function animateText(container, callbacks) {
     // [페이드 아웃] 이전 장면 사라짐 + 전환 드론
     container.style.opacity = '0';
     if (i > 0 && cb.onTransition) cb.onTransition();
-    await _sleep(i === 0 ? 400 : 1400);
+    await _sleep(i === 0 ? 300 : 600);
     if (cancelled()) return;
 
     // [장면 교체] 이전 블록 숨기고 현재 블록 표시
@@ -523,7 +523,7 @@ export async function animateText(container, callbacks) {
     });
 
     // [페이드 인] 새 장면 등장
-    await _sleep(50);
+    await _sleep(30);
     if (cancelled()) return;
     container.style.opacity = '1';
     _updateControls(i, scenes.length);
