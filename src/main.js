@@ -226,7 +226,9 @@ async function openReader(dir, file) {
     }
     html += '</div></div>';
 
-    html += `<div class="reveal text-[15px] md:text-base font-light leading-[2] text-slate-300" style="animation-delay:250ms" id="reader-body">${rendered}</div>`;
+    html += `<div class="reveal bg-night-850/50 border border-dawn-400/[0.06] rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm" style="animation-delay:200ms">`;
+    html += `<div class="text-[15px] md:text-base font-light leading-[2] text-slate-300" id="reader-body">${rendered}</div>`;
+    html += `</div>`;
 
     // 본문 하단 여백 (하단 바 공간 확보)
     html += '<div class="h-16"></div>';
