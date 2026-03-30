@@ -598,7 +598,7 @@ async function openTravelReader(loc) {
 
     // Nav between travel locations
     const idx = travelW.findIndex(l => l.id === loc.id);
-    html += '<div class="flex justify-between mt-8 pt-6 border-t border-dawn-400/[0.06]">';
+    html += '<div class="flex justify-between mt-8 pb-16 pt-6 border-t border-dawn-400/[0.06]">';
     if (idx > 0) {
       const p = travelW[idx - 1];
       html += `<button class="travel-nav text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-travel-id="${esc(p.id)}"><iconify-icon icon="solar:arrow-left-linear" width="12" class="mr-1 align-middle"></iconify-icon> ${esc(p.title)}</button>`;
