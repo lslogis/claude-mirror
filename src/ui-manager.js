@@ -276,12 +276,12 @@ export function renderMD(md) {
 
 // === 책꽂이 (Book Spine) 렌더링 ===
 const SPINE_COLORS = {
-  '에세이': '#e8c890',
-  '시': '#90b8f0',
-  '편지': '#90e0a0',
-  '독백': '#e0a0d0',
-  '선언문': '#f0b080',
-  '자화상': '#80d0e8',
+  '에세이': '#ffd8a0',
+  '시': '#a0c8ff',
+  '편지': '#a0ffa8',
+  '독백': '#ffa0e0',
+  '선언문': '#ffc898',
+  '자화상': '#98e8ff',
 };
 
 /**
@@ -314,7 +314,7 @@ export function renderBookSpines(list, activeFile, onSelect, onHover) {
             <div class="text-sm font-light leading-snug break-keep-all group-hover:text-dawn-200 transition-colors" style="color: #e8e0d4;">${esc(b.title)}</div>
             ${b.titleEn ? `<div class="text-[11px] mt-0.5 opacity-35" style="color: #b0a8a0;">${esc(b.titleEn)}</div>` : ''}
             ${b.description ? `<div class="text-[10px] mt-1.5 opacity-40 leading-relaxed line-clamp-2" style="color: #a09890;">${esc(b.description)}</div>` : ''}
-            <span class="inline-block text-[9px] mt-2 opacity-40 border rounded-full px-2 py-0.5" style="color: ${spineColor}; border-color: ${spineColor}40;">${esc(b.format)}</span>
+            <span class="inline-block text-[9px] mt-2 opacity-60 rounded-full px-2 py-0.5" style="color: ${spineColor}; border: 1.5px solid ${spineColor}50;">${esc(b.format)}</span>
           </div>
         </div>
       </div>`;

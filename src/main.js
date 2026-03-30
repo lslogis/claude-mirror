@@ -156,8 +156,8 @@ function updateShelf() {
 }
 
 const FORMAT_COLORS = {
-  '에세이': '#e8c890', '시': '#90b8f0', '편지': '#90e0a0',
-  '독백': '#e0a0d0', '선언문': '#f0b080', '자화상': '#80d0e8',
+  '에세이': '#ffd8a0', '시': '#a0c8ff', '편지': '#a0ffa8',
+  '독백': '#ffa0e0', '선언문': '#ffc898', '자화상': '#98e8ff',
 };
 
 function buildFilters() {
