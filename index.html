@@ -209,47 +209,6 @@
             </button>
           </div>
 
-          <!-- 읽기 모드 컨트롤 (탭 자리 대체) -->
-          <div id="nav-reader" class="hidden items-center gap-3 flex-1">
-            <!-- ← 목록 -->
-            <button id="nav-back" class="flex items-center gap-1 text-xs tracking-wider transition-colors duration-300 hover:text-dawn-200 mr-4" style="color: #9a9490;">
-              <iconify-icon icon="solar:arrow-left-linear" width="12"></iconify-icon>
-              목록
-            </button>
-
-            <!-- 이전 글 -->
-            <button id="nav-prev" class="flex items-center gap-1 text-xs transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 max-w-[140px] truncate" style="color: #9a9490;" disabled>
-              <iconify-icon icon="solar:arrow-left-linear" width="10" class="shrink-0"></iconify-icon>
-              <span id="nav-prev-title" class="truncate"></span>
-            </button>
-
-            <!-- 시네마 컨트롤 -->
-            <div id="cinema-controls" class="flex items-center gap-2 px-3 py-1 rounded-full mx-auto" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">
-              <button id="cinema-prev-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;">
-                <iconify-icon icon="solar:alt-arrow-left-linear" width="14"></iconify-icon>
-              </button>
-              <button id="cinema-toggle" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;">
-                <iconify-icon id="cinema-icon" icon="solar:play-linear" width="12"></iconify-icon>
-              </button>
-              <span id="cinema-scene" class="text-[10px] tabular-nums tracking-wider" style="color: #a09890;">1 / 1</span>
-              <div class="w-14 h-[3px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);">
-                <div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div>
-              </div>
-              <button id="cinema-next-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;">
-                <iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon>
-              </button>
-              <button id="cinema-stop" class="text-[10px] tracking-wider transition-colors duration-300 px-1.5 py-0.5 rounded hover:text-dawn-200" style="color: #9a9490;">
-                전문보기
-              </button>
-            </div>
-
-            <!-- 다음 글 -->
-            <button id="nav-next" class="flex items-center gap-1 text-xs transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 max-w-[140px] truncate" style="color: #9a9490;" disabled>
-              <span id="nav-next-title" class="truncate"></span>
-              <iconify-icon icon="solar:arrow-right-linear" width="10" class="shrink-0"></iconify-icon>
-            </button>
-          </div>
-
           <!-- 사운드 -->
           <button id="sound-btn" class="w-10 h-10 flex items-center justify-center rounded-full transition-colors duration-300" style="color: #c0b8a8;">
             <iconify-icon icon="solar:volume-cross-linear" width="18"></iconify-icon>

@@ -98,21 +98,6 @@ function switchView(target) {
     vignette.classList.remove('vignette-on');
   }
 
-  // 상단 바: 탭 ↔ 읽기 컨트롤 전환
-  const navTabs = $('#nav-tabs');
-  const navReader = $('#nav-reader');
-  if (navTabs && navReader) {
-    if (target === 'read') {
-      navTabs.classList.add('hidden');
-      navReader.classList.remove('hidden');
-      navReader.style.display = 'flex';
-    } else {
-      navTabs.classList.remove('hidden');
-      navReader.classList.add('hidden');
-      navReader.style.display = '';
-    }
-  }
-
   if (target !== 'read') {
     readingFile = null;
     resetMoodBackground();
@@ -252,45 +237,45 @@ async function openReader(dir, file) {
     }
     html += '</div></div>';
 
+    // 시네마 pill (글 상단)
+    html += `<div class="flex justify-center mb-6 reveal" style="animation-delay:150ms">`;
+    html += `<div id="cinema-controls" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">`;
+    html += `<button id="cinema-prev-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-left-linear" width="14"></iconify-icon></button>`;
+    html += `<button id="cinema-toggle" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;"><iconify-icon id="cinema-icon" icon="solar:play-linear" width="12"></iconify-icon></button>`;
+    html += `<span id="cinema-scene" class="text-[10px] tabular-nums tracking-wider" style="color: #a09890;">1 / 1</span>`;
+    html += `<div class="w-14 h-[3px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);"><div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div></div>`;
+    html += `<button id="cinema-next-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon></button>`;
+    html += `<button id="cinema-stop" class="text-[10px] tracking-wider transition-colors duration-300 px-1.5 py-0.5 rounded hover:text-dawn-200" style="color: #9a9490;">전문보기</button>`;
+    html += `</div></div>`;
+
+    // 본문
     html += `<div class="reveal bg-night-850/50 border border-dawn-400/[0.06] rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm" style="animation-delay:200ms">`;
     html += `<div class="text-[15px] md:text-base font-light leading-[2] text-slate-300" id="reader-body">${rendered}</div>`;
     html += `</div>`;
 
+    // 인라인 이전/다음 글
+    html += `<div class="flex justify-between items-center mt-8 mb-12 reveal" style="animation-delay:250ms">`;
+    if (idx > 0) {
+      const p = w[idx - 1];
+      html += `<button class="inline-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-dir="${esc(p.dirPath)}" data-file="${esc(p.filename)}"><iconify-icon icon="solar:arrow-left-linear" width="10" class="shrink-0"></iconify-icon><span class="truncate">${esc(p.title)}</span></button>`;
+    } else html += '<span></span>';
+    if (idx < w.length - 1) {
+      const n = w[idx + 1];
+      html += `<button class="inline-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-dir="${esc(n.dirPath)}" data-file="${esc(n.filename)}"><span class="truncate">${esc(n.title)}</span><iconify-icon icon="solar:arrow-right-linear" width="10" class="shrink-0"></iconify-icon></button>`;
+    } else html += '<span></span>';
+    html += '</div>';
+
     desk.innerHTML = html;
 
-    // 상단 nav-reader — 이전/다음 글 연결
-    const navPrev = $('#nav-prev');
-    const navNext = $('#nav-next');
-    const navPrevTitle = $('#nav-prev-title');
-    const navNextTitle = $('#nav-next-title');
-
-    if (navPrev && navPrevTitle) {
-      if (idx > 0) {
-        const p = w[idx - 1];
-        navPrev.disabled = false;
-        navPrevTitle.textContent = p.title;
-        navPrev.onclick = () => openReader(p.dirPath, p.filename);
-      } else {
-        navPrev.disabled = true;
-        navPrevTitle.textContent = '';
-      }
-    }
-    if (navNext && navNextTitle) {
-      if (idx < w.length - 1) {
-        const n = w[idx + 1];
-        navNext.disabled = false;
-        navNextTitle.textContent = n.title;
-        navNext.onclick = () => openReader(n.dirPath, n.filename);
-      } else {
-        navNext.disabled = true;
-        navNextTitle.textContent = '';
-      }
-    }
+    // 인라인 내비 이벤트
+    desk.querySelectorAll('.inline-nav').forEach(b => {
+      b.addEventListener('click', () => openReader(b.dataset.dir, b.dataset.file));
+    });
 
     // 영감의 종소리 — 새 글의 시작
     audio.zenBell();
 
-    // 시네마틱 렌더러 적용 (장면 전환/마지막 장면 사운드 연결)
+    // 시네마틱 렌더러 적용
     const readerBody = $('#reader-body');
     if (readerBody) {
       animateText(readerBody, {
@@ -481,8 +466,6 @@ function bindEvents() {
     switchSource('main');
   });
 
-  // 읽기 모드 → 목록 복귀
-  $('#nav-back')?.addEventListener('click', closeReader);
 
   // Sound — 클릭: 음소거 토글, 첫 클릭 시 오디오 초기화+재생
   const soundBtn = $('#sound-btn');
@@ -610,39 +593,27 @@ async function openTravelReader(loc) {
       html += `</div>`;
     }
 
-    html += '</div>';
+    // 인라인 이전/다음 여행지
+    const idx = travelW.findIndex(l => l.id === loc.id);
+    html += `<div class="flex justify-between items-center mt-8 mb-12">`;
+    if (idx > 0) {
+      const p = travelW[idx - 1];
+      html += `<button class="travel-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-travel-id="${esc(p.id)}"><iconify-icon icon="solar:arrow-left-linear" width="10" class="shrink-0"></iconify-icon><span class="truncate">${esc(p.title)}</span></button>`;
+    } else html += '<span></span>';
+    if (idx < travelW.length - 1) {
+      const n = travelW[idx + 1];
+      html += `<button class="travel-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-travel-id="${esc(n.id)}"><span class="truncate">${esc(n.title)}</span><iconify-icon icon="solar:arrow-right-linear" width="10" class="shrink-0"></iconify-icon></button>`;
+    } else html += '<span></span>';
+    html += '</div></div>';
 
     desk.innerHTML = html;
 
-    // 상단 nav-reader — 이전/다음 여행지 연결
-    const idx = travelW.findIndex(l => l.id === loc.id);
-    const navPrev = $('#nav-prev');
-    const navNext = $('#nav-next');
-    const navPrevTitle = $('#nav-prev-title');
-    const navNextTitle = $('#nav-next-title');
-
-    if (navPrev && navPrevTitle) {
-      if (idx > 0) {
-        const p = travelW[idx - 1];
-        navPrev.disabled = false;
-        navPrevTitle.textContent = p.title;
-        navPrev.onclick = () => openTravelReader(p);
-      } else {
-        navPrev.disabled = true;
-        navPrevTitle.textContent = '';
-      }
-    }
-    if (navNext && navNextTitle) {
-      if (idx < travelW.length - 1) {
-        const n = travelW[idx + 1];
-        navNext.disabled = false;
-        navNextTitle.textContent = n.title;
-        navNext.onclick = () => openTravelReader(n);
-      } else {
-        navNext.disabled = true;
-        navNextTitle.textContent = '';
-      }
-    }
+    desk.querySelectorAll('.travel-nav').forEach(b => {
+      b.addEventListener('click', () => {
+        const target = travelW.find(l => l.id === b.dataset.travelId);
+        if (target) openTravelReader(target);
+      });
+    });
 
     audio.zenBell();
     $('#desk').scrollTop = 0;
