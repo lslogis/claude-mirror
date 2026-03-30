@@ -394,9 +394,9 @@ function _updateControls(sceneIdx, totalScenes) {
 
 /**
  * 의미 단위 장면 그룹핑
- * - `---` (SVG 디바이더)만 장면 구분선으로 사용
- * - 헤딩, 문단 수 제한 없음 — 작가가 `---`로 의도한 섹션이 그대로 한 장면
- * - 디바이더 자체는 장면에 포함하지 않음
+ * - `---` (SVG 디바이더) = 장면 구분선 (장면에 포함하지 않음)
+ * - `<h2>` = 새 장면 시작 (헤딩은 장면에 포함)
+ * - 문단 수 제한 없음 — 섹션 내 모든 문단이 한 장면
  */
 function groupScenes(blocks) {
   const scenes = [];
@@ -410,9 +410,15 @@ function groupScenes(blocks) {
     const tag = b.tagName.toLowerCase();
     const isDivider = tag === 'div' && b.querySelector('svg');
 
+    // --- 디바이더: 장면 구분선 (화면에 표시하지 않음)
     if (isDivider) {
       pushScene();
       continue;
+    }
+
+    // H2: 새 장면 시작 (헤딩은 장면에 포함)
+    if (tag === 'h2') {
+      pushScene();
     }
 
     current.push(b);
