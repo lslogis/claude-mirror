@@ -596,26 +596,44 @@ async function openTravelReader(loc) {
       html += `</div>`;
     }
 
-    // Nav between travel locations
-    const idx = travelW.findIndex(l => l.id === loc.id);
-    html += '<div class="flex justify-between mt-8 pb-16 pt-6 border-t border-dawn-400/[0.06]">';
-    if (idx > 0) {
-      const p = travelW[idx - 1];
-      html += `<button class="travel-nav text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-travel-id="${esc(p.id)}"><iconify-icon icon="solar:arrow-left-linear" width="12" class="mr-1 align-middle"></iconify-icon> ${esc(p.title)}</button>`;
-    } else html += '<span></span>';
-    if (idx < travelW.length - 1) {
-      const n = travelW[idx + 1];
-      html += `<button class="travel-nav text-xs text-slate-300 hover:text-dawn-200 transition-colors px-3 py-2 rounded-lg hover:bg-dawn-400/5" data-travel-id="${esc(n.id)}">${esc(n.title)} <iconify-icon icon="solar:arrow-right-linear" width="12" class="ml-1 align-middle"></iconify-icon></button>`;
-    } else html += '<span></span>';
-    html += '</div></div>';
+    // 본문 하단 여백 (하단 바 공간 확보)
+    html += '<div class="h-16"></div>';
+    html += '</div>';
 
     desk.innerHTML = html;
-    desk.querySelectorAll('.travel-nav').forEach(b => {
-      b.addEventListener('click', () => {
-        const target = travelW.find(l => l.id === b.dataset.travelId);
-        if (target) openTravelReader(target);
-      });
-    });
+
+    // 통합 하단 바 — 이전/다음 여행지 연결
+    const idx = travelW.findIndex(l => l.id === loc.id);
+    const bottomBar = $('#reader-bottom-bar');
+    const barPrev = $('#bar-prev');
+    const barNext = $('#bar-next');
+    const barPrevTitle = $('#bar-prev-title');
+    const barNextTitle = $('#bar-next-title');
+
+    if (bottomBar) bottomBar.classList.remove('hidden');
+
+    if (barPrev && barPrevTitle) {
+      if (idx > 0) {
+        const p = travelW[idx - 1];
+        barPrev.disabled = false;
+        barPrevTitle.textContent = p.title;
+        barPrev.onclick = () => openTravelReader(p);
+      } else {
+        barPrev.disabled = true;
+        barPrevTitle.textContent = '';
+      }
+    }
+    if (barNext && barNextTitle) {
+      if (idx < travelW.length - 1) {
+        const n = travelW[idx + 1];
+        barNext.disabled = false;
+        barNextTitle.textContent = n.title;
+        barNext.onclick = () => openTravelReader(n);
+      } else {
+        barNext.disabled = true;
+        barNextTitle.textContent = '';
+      }
+    }
 
     audio.zenBell();
     $('#desk').scrollTop = 0;
