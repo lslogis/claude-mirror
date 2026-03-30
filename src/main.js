@@ -237,33 +237,34 @@ async function openReader(dir, file) {
     }
     html += '</div></div>';
 
-    // 시네마 pill (글 상단)
-    html += `<div class="flex justify-center mb-6 reveal" style="animation-delay:150ms">`;
-    html += `<div id="cinema-controls" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">`;
-    html += `<button id="cinema-prev-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-left-linear" width="14"></iconify-icon></button>`;
-    html += `<button id="cinema-toggle" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;"><iconify-icon id="cinema-icon" icon="solar:play-linear" width="12"></iconify-icon></button>`;
-    html += `<span id="cinema-scene" class="text-[10px] tabular-nums tracking-wider" style="color: #a09890;">1 / 1</span>`;
-    html += `<div class="w-14 h-[3px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);"><div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div></div>`;
-    html += `<button id="cinema-next-scene" class="w-6 h-6 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-right-linear" width="14"></iconify-icon></button>`;
-    html += `<button id="cinema-stop" class="text-[10px] tracking-wider transition-colors duration-300 px-1.5 py-0.5 rounded hover:text-dawn-200" style="color: #9a9490;">전문보기</button>`;
-    html += `</div></div>`;
-
-    // 본문
-    html += `<div class="reveal bg-night-850/50 border border-dawn-400/[0.06] rounded-2xl p-6 md:p-10 shadow-2xl backdrop-blur-sm" style="animation-delay:200ms">`;
-    html += `<div class="text-[15px] md:text-base font-light leading-[2] text-slate-300" id="reader-body">${rendered}</div>`;
-    html += `</div>`;
-
-    // 인라인 이전/다음 글
-    html += `<div class="flex justify-between items-center mt-8 mb-12 reveal" style="animation-delay:250ms">`;
+    // 이전글 — 제목 — 다음글 (제목 라인)
+    html += `<div class="flex justify-between items-center mb-4 reveal" style="animation-delay:150ms">`;
     if (idx > 0) {
       const p = w[idx - 1];
-      html += `<button class="inline-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-dir="${esc(p.dirPath)}" data-file="${esc(p.filename)}"><iconify-icon icon="solar:arrow-left-linear" width="10" class="shrink-0"></iconify-icon><span class="truncate">${esc(p.title)}</span></button>`;
+      html += `<button class="inline-nav flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 max-w-[30%] truncate" style="color: #9a9490;" data-dir="${esc(p.dirPath)}" data-file="${esc(p.filename)}"><iconify-icon icon="solar:arrow-left-linear" width="10" class="shrink-0"></iconify-icon><span class="truncate">${esc(p.title)}</span></button>`;
     } else html += '<span></span>';
+    html += `<span class="text-[10px] tracking-[0.2em] opacity-30" style="color: #a09890;">${esc(fm.title || id)}</span>`;
     if (idx < w.length - 1) {
       const n = w[idx + 1];
-      html += `<button class="inline-nav flex items-center gap-1.5 text-xs transition-colors duration-300 hover:text-dawn-200 max-w-[45%] truncate" style="color: #9a9490;" data-dir="${esc(n.dirPath)}" data-file="${esc(n.filename)}"><span class="truncate">${esc(n.title)}</span><iconify-icon icon="solar:arrow-right-linear" width="10" class="shrink-0"></iconify-icon></button>`;
+      html += `<button class="inline-nav flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 max-w-[30%] truncate" style="color: #9a9490;" data-dir="${esc(n.dirPath)}" data-file="${esc(n.filename)}"><span class="truncate">${esc(n.title)}</span><iconify-icon icon="solar:arrow-right-linear" width="10" class="shrink-0"></iconify-icon></button>`;
     } else html += '<span></span>';
     html += '</div>';
+
+    // 본문 카드 (pill 포함, 상하 패딩 축소)
+    html += `<div class="reveal bg-night-850/50 border border-dawn-400/[0.06] rounded-2xl px-6 md:px-10 pt-4 pb-6 md:pt-5 md:pb-8 shadow-2xl backdrop-blur-sm" style="animation-delay:200ms">`;
+    // 시네마 pill (카드 안 상단)
+    html += `<div class="flex justify-center mb-4">`;
+    html += `<div id="cinema-controls" class="inline-flex items-center gap-2 px-3 py-1 rounded-full" style="background: rgba(10,8,18,0.4); border: 1px solid rgba(220,168,102,0.06);">`;
+    html += `<button id="cinema-prev-scene" class="w-5 h-5 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-left-linear" width="12"></iconify-icon></button>`;
+    html += `<button id="cinema-toggle" class="w-5 h-5 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;"><iconify-icon id="cinema-icon" icon="solar:play-linear" width="11"></iconify-icon></button>`;
+    html += `<span id="cinema-scene" class="text-[9px] tabular-nums tracking-wider" style="color: #a09890;">1 / 1</span>`;
+    html += `<div class="w-12 h-[2px] rounded-full overflow-hidden" style="background: rgba(220,168,102,0.1);"><div id="cinema-progress" class="h-full rounded-full transition-all duration-700" style="background: rgba(220,168,102,0.4); width: 0%;"></div></div>`;
+    html += `<button id="cinema-next-scene" class="w-5 h-5 flex items-center justify-center rounded-full transition-all duration-300 hover:text-dawn-200" style="color: #9a9490;"><iconify-icon icon="solar:alt-arrow-right-linear" width="12"></iconify-icon></button>`;
+    html += `<button id="cinema-stop" class="text-[9px] tracking-wider transition-colors duration-300 px-1 py-0.5 rounded hover:text-dawn-200" style="color: #9a9490;">전문</button>`;
+    html += `</div></div>`;
+    // 본문 텍스트 (폰트 1단계 축소)
+    html += `<div class="text-[13px] md:text-[14px] font-light leading-[2] text-slate-300" id="reader-body">${rendered}</div>`;
+    html += `</div>`;
 
     desk.innerHTML = html;
 
