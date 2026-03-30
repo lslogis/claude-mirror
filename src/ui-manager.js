@@ -508,14 +508,14 @@ export async function animateText(container, callbacks) {
   blocks.forEach(b => { b.style.display = 'none'; });
   container.classList.add('cinematic-active');
   container.style.opacity = '0';
-  _paused = false;
+  _paused = true; // 기본값: 정지 상태
 
   // 컨트롤 바 표시
   const ctrl = $('#cinema-controls');
   if (ctrl) {
     ctrl.classList.remove('hidden');
     const icon = $('#cinema-icon');
-    if (icon) icon.setAttribute('icon', 'solar:pause-linear');
+    if (icon) icon.setAttribute('icon', 'solar:play-linear'); // 기본 정지
     const stopBtn = $('#cinema-stop');
     if (stopBtn) stopBtn.onclick = () => exitCinematic(container, blocks);
     const toggleBtn = $('#cinema-toggle');
@@ -544,7 +544,17 @@ export async function animateText(container, callbacks) {
     _updateControls(i, scenes.length);
   };
 
+  // 첫 장면 바로 표시 (정지 상태 — 재생 누를 때까지 대기)
+  showScene(0);
+  await _sleep(30);
+  container.style.opacity = '1';
+  if (cb.onScene) cb.onScene();
+
   let i = 0;
+  // 첫 장면에서 pause 대기 (수동 넘기기 or 재생 버튼 대기)
+  await _sleep(999999);
+  if (cancelled()) return;
+
   while (i < scenes.length) {
     if (cancelled()) return;
 
@@ -559,7 +569,6 @@ export async function animateText(container, callbacks) {
       await _sleep(30);
       container.style.opacity = '1';
       if (cb.onScene) cb.onScene();
-      // 수동 모드: 다음 점프 대기 (pause 상태)
       await _sleep(100);
       continue;
     }
@@ -569,8 +578,8 @@ export async function animateText(container, callbacks) {
 
     // [페이드 아웃] 이전 장면 사라짐 + 전환 드론
     container.style.opacity = '0';
-    if (i > 0 && cb.onTransition) cb.onTransition();
-    await _sleep(i === 0 ? 300 : 600);
+    if (cb.onTransition) cb.onTransition();
+    await _sleep(600);
     if (cancelled()) return;
     if (_manualJump >= 0) continue;
 

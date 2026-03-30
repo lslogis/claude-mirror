@@ -98,6 +98,21 @@ function switchView(target) {
     vignette.classList.remove('vignette-on');
   }
 
+  // 상단 바: 탭 ↔ 읽기 컨트롤 전환
+  const navTabs = $('#nav-tabs');
+  const navReader = $('#nav-reader');
+  if (navTabs && navReader) {
+    if (target === 'read') {
+      navTabs.classList.add('hidden');
+      navReader.classList.remove('hidden');
+      navReader.style.display = 'flex';
+    } else {
+      navTabs.classList.remove('hidden');
+      navReader.classList.add('hidden');
+      navReader.style.display = '';
+    }
+  }
+
   if (target !== 'read') {
     readingFile = null;
     resetMoodBackground();
@@ -241,40 +256,34 @@ async function openReader(dir, file) {
     html += `<div class="text-[15px] md:text-base font-light leading-[2] text-slate-300" id="reader-body">${rendered}</div>`;
     html += `</div>`;
 
-    // 본문 하단 여백 (하단 바 공간 확보)
-    html += '<div class="h-16"></div>';
-
     desk.innerHTML = html;
 
-    // 통합 하단 바 — 이전/다음 글 연결
-    const bottomBar = $('#reader-bottom-bar');
-    const barPrev = $('#bar-prev');
-    const barNext = $('#bar-next');
-    const barPrevTitle = $('#bar-prev-title');
-    const barNextTitle = $('#bar-next-title');
+    // 상단 nav-reader — 이전/다음 글 연결
+    const navPrev = $('#nav-prev');
+    const navNext = $('#nav-next');
+    const navPrevTitle = $('#nav-prev-title');
+    const navNextTitle = $('#nav-next-title');
 
-    if (bottomBar) bottomBar.classList.remove('hidden');
-
-    if (barPrev && barPrevTitle) {
+    if (navPrev && navPrevTitle) {
       if (idx > 0) {
         const p = w[idx - 1];
-        barPrev.disabled = false;
-        barPrevTitle.textContent = p.title;
-        barPrev.onclick = () => openReader(p.dirPath, p.filename);
+        navPrev.disabled = false;
+        navPrevTitle.textContent = p.title;
+        navPrev.onclick = () => openReader(p.dirPath, p.filename);
       } else {
-        barPrev.disabled = true;
-        barPrevTitle.textContent = '';
+        navPrev.disabled = true;
+        navPrevTitle.textContent = '';
       }
     }
-    if (barNext && barNextTitle) {
+    if (navNext && navNextTitle) {
       if (idx < w.length - 1) {
         const n = w[idx + 1];
-        barNext.disabled = false;
-        barNextTitle.textContent = n.title;
-        barNext.onclick = () => openReader(n.dirPath, n.filename);
+        navNext.disabled = false;
+        navNextTitle.textContent = n.title;
+        navNext.onclick = () => openReader(n.dirPath, n.filename);
       } else {
-        barNext.disabled = true;
-        barNextTitle.textContent = '';
+        navNext.disabled = true;
+        navNextTitle.textContent = '';
       }
     }
 
@@ -301,8 +310,6 @@ async function openReader(dir, file) {
 function closeReader() {
   switchView('list');
   renderBooks();
-  const bottomBar = $('#reader-bottom-bar');
-  if (bottomBar) bottomBar.classList.add('hidden');
 }
 
 // === A4 ===
@@ -474,6 +481,9 @@ function bindEvents() {
     switchSource('main');
   });
 
+  // 읽기 모드 → 목록 복귀
+  $('#nav-back')?.addEventListener('click', closeReader);
+
   // Sound — 클릭: 음소거 토글, 첫 클릭 시 오디오 초기화+재생
   const soundBtn = $('#sound-btn');
   const soundIcon = soundBtn?.querySelector('iconify-icon');
@@ -600,42 +610,37 @@ async function openTravelReader(loc) {
       html += `</div>`;
     }
 
-    // 본문 하단 여백 (하단 바 공간 확보)
-    html += '<div class="h-16"></div>';
     html += '</div>';
 
     desk.innerHTML = html;
 
-    // 통합 하단 바 — 이전/다음 여행지 연결
+    // 상단 nav-reader — 이전/다음 여행지 연결
     const idx = travelW.findIndex(l => l.id === loc.id);
-    const bottomBar = $('#reader-bottom-bar');
-    const barPrev = $('#bar-prev');
-    const barNext = $('#bar-next');
-    const barPrevTitle = $('#bar-prev-title');
-    const barNextTitle = $('#bar-next-title');
+    const navPrev = $('#nav-prev');
+    const navNext = $('#nav-next');
+    const navPrevTitle = $('#nav-prev-title');
+    const navNextTitle = $('#nav-next-title');
 
-    if (bottomBar) bottomBar.classList.remove('hidden');
-
-    if (barPrev && barPrevTitle) {
+    if (navPrev && navPrevTitle) {
       if (idx > 0) {
         const p = travelW[idx - 1];
-        barPrev.disabled = false;
-        barPrevTitle.textContent = p.title;
-        barPrev.onclick = () => openTravelReader(p);
+        navPrev.disabled = false;
+        navPrevTitle.textContent = p.title;
+        navPrev.onclick = () => openTravelReader(p);
       } else {
-        barPrev.disabled = true;
-        barPrevTitle.textContent = '';
+        navPrev.disabled = true;
+        navPrevTitle.textContent = '';
       }
     }
-    if (barNext && barNextTitle) {
+    if (navNext && navNextTitle) {
       if (idx < travelW.length - 1) {
         const n = travelW[idx + 1];
-        barNext.disabled = false;
-        barNextTitle.textContent = n.title;
-        barNext.onclick = () => openTravelReader(n);
+        navNext.disabled = false;
+        navNextTitle.textContent = n.title;
+        navNext.onclick = () => openTravelReader(n);
       } else {
-        barNext.disabled = true;
-        barNextTitle.textContent = '';
+        navNext.disabled = true;
+        navNextTitle.textContent = '';
       }
     }
 
