@@ -238,15 +238,15 @@
 
       <!-- 통합 하단 바: ← 이전글 | 재생바 | 다음글 → -->
       <div id="reader-bottom-bar" class="hidden fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl" style="background: rgba(10,8,18,0.82); border-top: 1px solid rgba(220,168,102,0.08);">
-        <div class="max-w-3xl mx-auto px-4 py-2 flex items-center justify-between gap-2">
-          <!-- 이전 글 -->
-          <button id="bar-prev" class="flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 shrink-0 max-w-[160px] truncate" style="color: #9a9490;" disabled>
-            <iconify-icon icon="solar:arrow-left-linear" width="12"></iconify-icon>
+        <div class="max-w-3xl mx-auto px-4 py-2 relative flex items-center" style="height: 40px;">
+          <!-- 이전 글 (왼쪽 고정) -->
+          <button id="bar-prev" class="absolute left-4 flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 max-w-[200px] truncate" style="color: #9a9490;" disabled>
+            <iconify-icon icon="solar:arrow-left-linear" width="12" class="shrink-0"></iconify-icon>
             <span id="bar-prev-title" class="truncate"></span>
           </button>
 
-          <!-- 재생 컨트롤 (가운데) -->
-          <div id="cinema-controls" class="flex items-center gap-2 px-3 py-1 rounded-full" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">
+          <!-- 재생 컨트롤 (절대 센터 고정) -->
+          <div id="cinema-controls" class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1 rounded-full" style="background: rgba(10,8,18,0.5); border: 1px solid rgba(220,168,102,0.08);">
             <button id="cinema-toggle" class="w-7 h-7 flex items-center justify-center rounded-full transition-all duration-300" style="color: #c8a878;">
               <iconify-icon id="cinema-icon" icon="solar:pause-linear" width="14"></iconify-icon>
             </button>
@@ -259,10 +259,10 @@
             </button>
           </div>
 
-          <!-- 다음 글 -->
-          <button id="bar-next" class="flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 shrink-0 max-w-[160px] truncate" style="color: #9a9490;" disabled>
+          <!-- 다음 글 (오른쪽 고정) -->
+          <button id="bar-next" class="absolute right-4 flex items-center gap-1 text-[11px] transition-colors duration-300 hover:text-dawn-200 disabled:opacity-20 max-w-[200px] truncate" style="color: #9a9490;" disabled>
             <span id="bar-next-title" class="truncate"></span>
-            <iconify-icon icon="solar:arrow-right-linear" width="12"></iconify-icon>
+            <iconify-icon icon="solar:arrow-right-linear" width="12" class="shrink-0"></iconify-icon>
           </button>
         </div>
       </div>
