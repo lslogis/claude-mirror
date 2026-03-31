@@ -129,6 +129,15 @@ export async function loadTravelLocations() {
         } catch { return null; }
       }));
       const valid = files.filter(Boolean);
+      const enFiles = await Promise.all(fileOrder.map(async fn => {
+        try {
+          const text = await fetchText(`${RAW}/${dir}/en/${fn}`);
+          cache[`${dir}/en/${fn}`] = text;
+          const fm = parseFM(text);
+          return { filename: fn, dirPath: `${dir}/en`, title: fm.title || fn, titleEn: fm.title_en || '', format: FMT[fm.format] || fm.format || '' };
+        } catch { return null; }
+      }));
+      const validEn = enFiles.filter(Boolean);
       const infoText = cache[`${dir}/info.md`] || '';
       const infoFM = parseFM(infoText);
       return {
@@ -137,7 +146,8 @@ export async function loadTravelLocations() {
         title: infoFM.title || d.name,
         titleEn: infoFM.title_en || '',
         description: infoFM.description || '',
-        files: valid
+        files: valid,
+        enFiles: validEn
       };
     }));
     return results.filter(Boolean);

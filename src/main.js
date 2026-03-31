@@ -559,11 +559,15 @@ function showTravels() {
   });
 }
 
-async function openTravelReader(loc) {
+async function openTravelReader(loc, lang) {
   readingFile = loc.id;
   switchView('read');
   const desk = $('#reader-content');
   desk.innerHTML = '<div class="flex items-center justify-center min-h-[40vh]"><span class="text-xs text-slate-400 tracking-widest">loading...</span></div>';
+
+  const hasEn = loc.enFiles && loc.enFiles.length > 0;
+  const activeLang = lang || (hasEn ? 'ko' : 'ko');
+  const activeFiles = activeLang === 'en' ? loc.enFiles : loc.files;
 
   try {
     let html = '<div class="reveal max-w-lg mx-auto" style="animation-delay:100ms">';
@@ -574,11 +578,17 @@ async function openTravelReader(loc) {
     html += `<h1 class="text-2xl font-serif font-light leading-relaxed" style="color: #e8e0d4;">${esc(loc.title)}</h1>`;
     if (loc.titleEn) html += `<div class="text-xs mt-1.5 opacity-40" style="color: #b0a8a0;">${esc(loc.titleEn)}</div>`;
     if (loc.description) html += `<div class="text-sm mt-3 opacity-50 italic" style="color: #a09890;">${esc(loc.description)}</div>`;
+    if (hasEn) {
+      html += `<div class="flex justify-center gap-3 mt-4">`;
+      html += `<button class="travel-lang-btn text-[10px] tracking-[0.2em] px-3 py-1 rounded transition-colors duration-200 ${activeLang === 'ko' ? 'opacity-100' : 'opacity-30 hover:opacity-60'}" style="color: #c8a878; border: 1px solid #c8a87840;" data-lang="ko" data-travel-id="${esc(loc.id)}">KO</button>`;
+      html += `<button class="travel-lang-btn text-[10px] tracking-[0.2em] px-3 py-1 rounded transition-colors duration-200 ${activeLang === 'en' ? 'opacity-100' : 'opacity-30 hover:opacity-60'}" style="color: #c8a878; border: 1px solid #c8a87840;" data-lang="en" data-travel-id="${esc(loc.id)}">EN</button>`;
+      html += `</div>`;
+    }
     html += '</div>';
 
     // File sections
-    for (const f of loc.files) {
-      const key = `${loc.dirPath}/${f.filename}`;
+    for (const f of activeFiles) {
+      const key = `${f.dirPath}/${f.filename}`;
       if (!getCache(key)) setCache(key, await fetchText(`${RAW}/${key}`));
       const text = getCache(key);
       const fm = parseFM(text);
@@ -608,6 +618,13 @@ async function openTravelReader(loc) {
     html += '</div></div>';
 
     desk.innerHTML = html;
+
+    desk.querySelectorAll('.travel-lang-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        const target = travelW.find(l => l.id === b.dataset.travelId);
+        if (target) openTravelReader(target, b.dataset.lang);
+      });
+    });
 
     desk.querySelectorAll('.travel-nav').forEach(b => {
       b.addEventListener('click', () => {
